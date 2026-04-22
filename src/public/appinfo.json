@@ -1,0 +1,16 @@
+{
+  "id": "com.crunchyroll.aion",
+  "version": "1.0.0",
+  "vendor": "Kevin Dana",
+  "type": "web",
+  "main": "index.html",
+  "title": "Crunchyroll",
+  "appDescription": "Unofficial Crunchyroll app for WebOS TV",
+  "icon": "images/80px.png",
+  "largeIcon": "images/130px.png",
+  "splashBackground": "images/background.png",
+  "bgImage": "images/background.png",
+  "bgColor": "#F37521",
+  "iconColor": "#F37521",
+  "disableBackHistoryAPI": false
+}

@@ -1,0 +1,125 @@
+.container {
+  background: #151520;
+  border-left: 1px solid #2a2a35;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 380px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem;
+  border-bottom: 1px solid #2a2a35;
+}
+
+.title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #8a8a8a;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.closeBtn:hover {
+  color: #fff;
+}
+
+.info {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: rgba(244, 117, 33, 0.1);
+  border-bottom: 1px solid #2a2a35;
+}
+
+.thumb {
+  width: 80px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.animeTitle {
+  color: #F47521;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.epCount {
+  color: #8a8a8a;
+  font-size: 0.85rem;
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.episode {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+  transition: background 0.2s ease;
+}
+
+.episode:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.episode.active {
+  background: rgba(244, 117, 33, 0.15);
+}
+
+.epNum {
+  color: #F47521;
+  font-size: 1rem;
+  font-weight: 700;
+  min-width: 28px;
+}
+
+.epInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.epTitle {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.epDesc {
+  color: #666;
+  font-size: 0.8rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.epDuration {
+  color: #8a8a8a;
+  font-size: 0.8rem;
+}

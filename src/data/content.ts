@@ -1,0 +1,176 @@
+import { Anime, Category, Season } from '../types';
+
+const BASE_IMAGE = 'https://picsum.photos';
+
+export const mockAnime: Anime[] = [
+  {
+    id: '1',
+    title: 'Demon Slayer: Kimetsu no Yaiba',
+    titleJapanese: '鬼滅の刃',
+    synopsis: 'Tanjiro Kamado es un joven que vende carbón para ganarse la vida, pero su mundo cambia cuando un demonio assassina a su familia y convierte a su hermana Nezuko en un demonio. Ahora debe buscar una cura para su hermana y vengar a su familia.',
+    image: `${BASE_IMAGE}/seed/demon1/400/600`,
+    year: 2019,
+    episodes: 26,
+    status: 'completed',
+    rating: 92,
+    genres: ['Acción', 'Demonios', 'Historico', 'Shounen'],
+    studios: ['Ufotable'],
+    season: 'Winter 2019',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+    episodesList: [
+      { number: 1, title: 'Cruelty', description: 'La historia de Tanjiro y su familia.', thumbnail: `${BASE_IMAGE}/seed/ep11/320/180`, duration: 24, airedDate: '2019-04-06' },
+      { number: 2, title: 'The Stranger', description: 'Tanjiro conoce a un cazador de demonios.', thumbnail: `${BASE_IMAGE}/seed/ep12/320/180`, duration: 24, airedDate: '2019-04-13' },
+      { number: 3, title: 'Awakening', description: 'Tanjiro despierta su habilidad.', thumbnail: `${BASE_IMAGE}/seed/ep13/320/180`, duration: 24, airedDate: '2019-04-20' },
+      { number: 4, title: 'The First Step', description: 'Tanjiro comienza su entrenamiento.', thumbnail: `${BASE_IMAGE}/seed/ep14/320/180`, duration: 24, airedDate: '2019-04-27' },
+      { number: 5, title: 'My Own Steel', description: 'El viaje de Tanjiro continúa.', thumbnail: `${BASE_IMAGE}/seed/ep15/320/180`, duration: 24, airedDate: '2019-05-04' },
+    ]
+  },
+  {
+    id: '2',
+    title: 'Attack on Titan',
+    titleJapanese: '進撃の巨人',
+    synopsis: 'En un mundo donde la humanidad vive dentro de ciudades rodeadas por enormes muros, Eren Yeager jura venganza contra los titanes que destruyeron su hogar.',
+    image: `${BASE_IMAGE}/seed/titan1/400/600`,
+    year: 2013,
+    episodes: 25,
+    status: 'completed',
+    rating: 89,
+    genres: ['Acción', 'Drama', 'Fantasía', 'Misterio'],
+    studios: ['Wit Studio'],
+    season: 'Summer 2013',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+  },
+  {
+    id: '3',
+    title: 'Jujutsu Kaisen',
+    titleJapanese: '呪術廻戦',
+    synopsis: 'Yuji Itadori, un estudiante de secundaria con una fuerza física extraordinaria, se encuentra con una maldición malvada y entra al mundo de los Jujutsu.',
+    image: `${BASE_IMAGE}/seed/jujuts1/400/600`,
+    year: 2020,
+    episodes: 24,
+    status: 'completed',
+    rating: 88,
+    genres: ['Acción', 'Escolar', 'Sobrenatural'],
+    studios: ['MAPPA'],
+    season: 'Fall 2020',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+  },
+  {
+    id: '4',
+    title: 'One Piece',
+    titleJapanese: 'ワンピース',
+    synopsis: 'Monkey D. Luffy se pone como meta tener un sombrero de paja y convertirse en el Rey de los Piratas.',
+    image: `${BASE_IMAGE}/seed/onepiec1/400/600`,
+    year: 1999,
+    episodes: 1000,
+    status: 'ongoing',
+    rating: 91,
+    genres: ['Aventura', 'Comedia', 'Fantasía', 'Shounen'],
+    studios: ['Toei Animation'],
+    season: 'Fall 1999',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+  },
+  {
+    id: '5',
+    title: 'Chainsaw Man',
+    titleJapanese: 'チェンソーマン',
+    synopsis: 'Denji es un joven que está muerto de deudas. Pero todo cambia cuando se fusiona con su perro demoníaco Chainsaw.',
+    image: `${BASE_IMAGE}/seed/chains1/400/600`,
+    year: 2022,
+    episodes: 12,
+    status: 'completed',
+    rating: 85,
+    genres: ['Acción', 'Sobrenatural', 'Drama'],
+    studios: ['MAPPA'],
+    season: 'Fall 2022',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+  },
+  {
+    id: '6',
+    title: 'Spy x Family',
+    titleJapanese: 'スパイファミリー',
+    synopsis: 'Un espía, una asesina y una niña telépática forman una familia temporal para cumplir sus misiones.',
+    image: `${BASE_IMAGE}/seed/spy1/400/600`,
+    year: 2022,
+    episodes: 25,
+    status: 'completed',
+    rating: 90,
+    genres: ['Acción', 'Comedia', 'Escolar'],
+    studios: ['Wit Studio', 'CloverWorks'],
+    season: 'Spring 2022',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+  },
+  {
+    id: '7',
+    title: 'Dragon Ball Z',
+    titleJapanese: 'Dragon Ball Z Kai',
+    synopsis: 'Goku y sus amigos deben proteger la Tierra de los Saiyan invasores y otros villanos.',
+    image: `${BASE_IMAGE}/seed/dragon1/400/600`,
+    year: 1989,
+    episodes: 291,
+    status: 'completed',
+    rating: 87,
+    genres: ['Acción', 'Aventura', 'Comedia', 'Shounen'],
+    studios: ['Toei Animation'],
+    season: 'Spring 1989',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+  },
+  {
+    id: '8',
+    title: 'My Hero Academia',
+    titleJapanese: '僕のヒーローアカデミア',
+    synopsis: 'En un mundo donde el 80% de la población tiene superpoderes llamado "Quirk", Izuki Midoriya sueña con convertirse en héroe.',
+    image: `${BASE_IMAGE}/seed/hero1/400/600`,
+    year: 2016,
+    episodes: 13,
+    status: 'completed',
+    rating: 86,
+    genres: ['Acción', 'Escolar', 'Shounen'],
+    studios: ['Bones'],
+    season: 'Spring 2016',
+    streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+  },
+];
+
+export const mockCategories: Category[] = [
+  { id: 'all', name: 'All' },
+  { id: 'trending', name: 'Trending Now' },
+  { id: 'popular', name: 'Most Popular' },
+  { id: 'new', name: 'New on Crunchyroll' },
+  { id: 'simulcast', name: 'Simulcast' },
+  { id: 'action', name: 'Action' },
+  { id: 'adventure', name: 'Adventure' },
+  { id: 'comedy', name: 'Comedy' },
+  { id: 'drama', name: 'Drama' },
+  { id: 'fantasy', name: 'Fantasy' },
+  { id: 'horror', name: 'Horror' },
+  { id: 'romance', name: 'Romance' },
+  { id: 'scifi', name: 'Sci-Fi' },
+  { id: 'sliceoflife', name: 'Slice of Life' },
+  { id: 'sports', name: 'Sports' },
+  { id: 'supernatural', name: 'Supernatural' },
+];
+
+export const mockSeasons: Season[] = [
+  { id: 'spring-2024', name: 'Spring 2024', year: 2024, season: 'spring' },
+  { id: 'winter-2024', name: 'Winter 2024', year: 2024, season: 'winter' },
+  { id: 'fall-2023', name: 'Fall 2023', year: 2023, season: 'fall' },
+  { id: 'summer-2023', name: 'Summer 2023', year: 2023, season: 'summer' },
+  { id: 'spring-2023', name: 'Spring 2023', year: 2023, season: 'spring' },
+  { id: 'winter-2023', name: 'Winter 2023', year: 2023, season: 'winter' },
+];
+
+export function getAnimeById(id: string): Anime | undefined {
+  return mockAnime.find((a) => a.id === id);
+}
+
+export function searchAnime(query: string): Anime[] {
+  const q = query.toLowerCase();
+  return mockAnime.filter(
+    (a) =>
+      a.title.toLowerCase().includes(q) ||
+      a.titleJapanese?.toLowerCase().includes(q) ||
+      a.synopsis.toLowerCase().includes(q) ||
+      a.genres.some((g) => g.toLowerCase().includes(q))
+  );
+}

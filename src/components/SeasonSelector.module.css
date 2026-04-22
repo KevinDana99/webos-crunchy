@@ -1,0 +1,48 @@
+.container {
+  padding: 1rem 4rem;
+}
+
+.label {
+  color: #8a8a8a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.seasons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.seasonBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid #2a2a35;
+  color: #8a8a8a;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.seasonBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.seasonBtn.active {
+  background: #F47521;
+  border-color: #F47521;
+  color: #000;
+}
+
+.seasonName {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
