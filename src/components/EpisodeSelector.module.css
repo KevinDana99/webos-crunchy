@@ -6,6 +6,8 @@
   flex-direction: column;
   width: 380px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  will-change: transform;
 }
 
 .header {

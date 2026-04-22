@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'preact/hooks';
 import { currentAnime, currentEpisode, playAnime } from '../state/appState';
 import styles from './EpisodeSelector.module.css';
 
@@ -9,6 +10,26 @@ export function EpisodeSelector({ onClose }: EpisodeSelectorProps) {
   const anime = currentAnime.value;
   const currentEp = currentEpisode.value;
   const episodes = anime?.episodesList || [];
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = listRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: Event) => {
+      const wheelEvent = e as unknown as { wheelDeltaY?: number; deltaY?: number };
+      const wd = wheelEvent.wheelDeltaY;
+      const dy = wheelEvent.deltaY;
+      const delta = wd !== undefined ? wd : (dy !== undefined ? -dy : 0);
+      if (container && delta !== 0) {
+        container.scrollTop -= delta;
+        e.preventDefault();
+      }
+    };
+
+    container.addEventListener('mousewheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('mousewheel', handleWheel);
+  }, []);
 
   if (!anime) return null;
 
@@ -27,7 +48,7 @@ export function EpisodeSelector({ onClose }: EpisodeSelectorProps) {
         </div>
       </div>
 
-      <div class={styles.list}>
+      <div class={styles.list} ref={listRef}>
         {episodes.map((ep) => (
           <button
             key={ep.number}

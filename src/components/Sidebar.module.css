@@ -24,6 +24,8 @@
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  will-change: transform;
 }
 
 .sidebar.open {

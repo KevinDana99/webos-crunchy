@@ -85,38 +85,37 @@ function scrollPage(deltaY: number, target?: EventTarget | null) {
   const scrollTarget = findScrollableElement(target || null)
 
   if (scrollTarget) {
-    scrollTarget.scrollTop += deltaY
+    scrollTarget.scrollTop -= deltaY
+    scrollTarget.dispatchEvent(new Event('scroll'))
     return
   }
 
   const root = document.documentElement
   const body = document.body
-  const before = window.pageYOffset || root.scrollTop || body.scrollTop || 0
-
-  window.scrollBy(0, deltaY)
-
-  const after = window.pageYOffset || root.scrollTop || body.scrollTop || 0
-  if (after === before) {
-    root.scrollTop = before + deltaY
-    body.scrollTop = before + deltaY
+  
+  root.scrollTop -= deltaY
+  body.scrollTop -= deltaY
+  
+  if (root.scrollTop > 0 || body.scrollTop > 0) {
+    return
   }
+
+  window.scrollBy(0, -deltaY)
 }
 
 function getWheelDelta(event: Event) {
   const legacyEvent = event as LegacyScrollEvent
 
   if (typeof legacyEvent.deltaY === 'number' && legacyEvent.deltaY !== 0) {
-    if (legacyEvent.deltaMode === 1) return legacyEvent.deltaY * 40
-    if (legacyEvent.deltaMode === 2) return legacyEvent.deltaY * window.innerHeight
     return legacyEvent.deltaY
   }
 
   if (typeof legacyEvent.wheelDeltaY === 'number' && legacyEvent.wheelDeltaY !== 0) {
-    return -legacyEvent.wheelDeltaY
+    return legacyEvent.wheelDeltaY
   }
 
   if (typeof legacyEvent.wheelDelta === 'number' && legacyEvent.wheelDelta !== 0) {
-    return -legacyEvent.wheelDelta
+    return legacyEvent.wheelDelta
   }
 
   if (typeof legacyEvent.detail === 'number') {
@@ -186,9 +185,9 @@ window.addEventListener('keydown', (e) => {
 
 document.addEventListener('mouseover', handlePointerFocus, false)
 document.addEventListener('cursorStateChange', handleCursorStateChange, false)
-window.addEventListener('wheel', handleWheelScroll, false)
-window.addEventListener('mousewheel', handleWheelScroll, false)
-window.addEventListener('DOMMouseScroll', handleWheelScroll, false)
+window.addEventListener('wheel', handleWheelScroll, { passive: false })
+window.addEventListener('mousewheel', handleWheelScroll, { passive: false })
+window.addEventListener('DOMMouseScroll', handleWheelScroll, { passive: false })
 
 export function App() {
   return (

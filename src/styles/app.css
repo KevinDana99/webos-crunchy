@@ -1,35 +1,24 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html,
-body,
-#app {
-  min-height: 100%;
-}
-
-html,
-body {
-  height: auto;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-#app {
-  min-height: 100vh;
+html {
+  height: 100%;
+  overflow: hidden; /* Evita que el scroll se duplique o se pierda */
 }
 
 body {
+  height: 100%;
+  overflow: hidden; /* Delegamos el scroll al contenedor de la app */
   font-family: 'Crunchyroll', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   background: #0f0f15;
   color: #fff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
+#app {
+  height: 100%;
+  width: 100%;
+  /* Aquí es donde sucede la magia del scroll */
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
 a {
   color: inherit;
   text-decoration: none;
@@ -37,6 +26,9 @@ a {
 
 button {
   font-family: inherit;
+}
+#app::-webkit-scrollbar {
+  width: 10px;
 }
 
 ::-webkit-scrollbar {

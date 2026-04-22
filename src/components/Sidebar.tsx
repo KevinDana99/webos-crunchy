@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'preact/hooks';
 import { categories, activeCategory, setActiveCategory, showSidebar, showQueue, queue, animeList } from '../state/appState';
 import styles from './Sidebar.module.css';
 
@@ -6,8 +7,28 @@ export function Sidebar() {
   const active = activeCategory.value;
   const isOpen = showSidebar.value;
   const queueOpen = showQueue.value;
+  const queueRef = useRef<HTMLDivElement>(null);
 
   const queueItems = animeList.value.filter((a) => queue.value.includes(a.id));
+
+  useEffect(() => {
+    const container = queueRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: Event) => {
+      const wheelEvent = e as unknown as { wheelDeltaY?: number; deltaY?: number };
+      const wd = wheelEvent.wheelDeltaY;
+      const dy = wheelEvent.deltaY;
+      const delta = wd !== undefined ? wd : (dy !== undefined ? -dy : 0);
+      if (container && delta !== 0) {
+        container.scrollTop -= delta;
+        e.preventDefault();
+      }
+    };
+
+    container.addEventListener('mousewheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('mousewheel', handleWheel);
+  }, []);
 
   return (
     <>
@@ -33,7 +54,7 @@ export function Sidebar() {
         )}
 
         {queueOpen && (
-          <div class={styles.queue}>
+          <div class={styles.queue} ref={queueRef}>
             {queueItems.length === 0 ? (
               <p class={styles.emptyQueue}>Your queue is empty</p>
             ) : (
