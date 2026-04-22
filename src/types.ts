@@ -1,3 +1,11 @@
+export interface AnimeSeason {
+  id: string;
+  name: string;
+  year: number;
+  season: 'winter' | 'spring' | 'summer' | 'fall';
+  episodes: Episode[];
+}
+
 export interface Anime {
   id: string;
   title: string;
@@ -11,6 +19,7 @@ export interface Anime {
   genres: string[];
   studios: string[];
   episodesList?: Episode[];
+  seasons?: AnimeSeason[];
   season?: string;
   streamUrl: string;
 }

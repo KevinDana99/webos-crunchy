@@ -1,5 +1,5 @@
 import { Anime } from '../types';
-import { playAnime, toggleQueue, isInQueue } from '../state/appState';
+import { toggleQueue, isInQueue, selectAnime } from '../state/appState';
 import styles from './AnimeCard.module.css';
 
 interface AnimeCardProps {
@@ -15,7 +15,7 @@ export function AnimeCard({ anime, size = 'medium', onPlay }: AnimeCardProps) {
     if (onPlay) {
       onPlay(anime);
     } else {
-      playAnime(anime);
+      selectAnime(anime);
     }
   };
 

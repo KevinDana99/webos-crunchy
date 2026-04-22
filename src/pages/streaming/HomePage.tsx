@@ -5,15 +5,15 @@ import { Sidebar } from '../../components/Sidebar';
 import { HeroSection } from '../../components/HeroSection';
 import { AnimeCard } from '../../components/AnimeCard';
 import { SeasonSelector } from '../../components/SeasonSelector';
-import { filteredAnime, searchResults, searchQuery, activeCategory, playAnime } from '../../state/appState';
+import { filteredAnime, searchResults, searchQuery, activeCategory, selectAnime } from '../../state/appState';
 import styles from './HomePage.module.css';
 
 export function HomePage() {
   const { route } = useLocation();
 
   const handlePlay = (anime: Anime) => {
-    playAnime(anime);
-    route('/watch');
+    selectAnime(anime);
+    route('/info');
   };
 
   const showSearchResults = searchQuery.value && searchResults.value.length > 0;

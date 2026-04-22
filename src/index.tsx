@@ -3,6 +3,7 @@ import { LocationProvider, Router, Route } from 'preact-iso'
 import { HomePage } from './pages/streaming/HomePage'
 import { WatchPage } from './pages/streaming/WatchPage'
 import { LoginPage } from './pages/streaming/LoginPage'
+import { DetailPage } from './pages/streaming/DetailPage'
 import './styles/app.css'
 import eruda from 'eruda'
 
@@ -196,6 +197,7 @@ export function App() {
         <Route path='/' component={HomePage} />
         <Route path='/watch' component={WatchPage} />
         <Route path='/login' component={LoginPage} />
+        <Route path='/info' component={DetailPage} />
         <Route default component={HomePage} />
       </Router>
     </LocationProvider>

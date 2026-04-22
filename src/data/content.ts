@@ -32,13 +32,59 @@ export const mockAnime: Anime[] = [
     synopsis: 'En un mundo donde la humanidad vive dentro de ciudades rodeadas por enormes muros, Eren Yeager jura venganza contra los titanes que destruyeron su hogar.',
     image: `${BASE_IMAGE}/seed/titan1/400/600`,
     year: 2013,
-    episodes: 25,
+    episodes: 87,
     status: 'completed',
     rating: 89,
     genres: ['Acción', 'Drama', 'Fantasía', 'Misterio'],
-    studios: ['Wit Studio'],
+    studios: ['Wit Studio', 'MAPPA'],
     season: 'Summer 2013',
     streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+    seasons: [
+      {
+        id: 's1',
+        name: 'Season 1',
+        year: 2013,
+        season: 'summer',
+        episodes: [
+          { number: 1, title: 'To You, 2000 Years Later', description: 'Eren testimonia la caída de Shiganshina.', thumbnail: `${BASE_IMAGE}/seed/aot11/320/180`, duration: 24, airedDate: '2013-04-07' },
+          { number: 2, title: 'That Day', description: 'El día en que todo cambió.', thumbnail: `${BASE_IMAGE}/seed/aot12/320/180`, duration: 24, airedDate: '2013-04-14' },
+          { number: 3, title: 'A Dim Light', description: 'Eren se une al ejército.', thumbnail: `${BASE_IMAGE}/seed/aot13/320/180`, duration: 24, airedDate: '2013-04-21' },
+          { number: 4, title: 'The First Dinner', description: 'El primer entrenamiento.', thumbnail: `${BASE_IMAGE}/seed/aot14/320/180`, duration: 24, airedDate: '2013-04-28' },
+        ]
+      },
+      {
+        id: 's2',
+        name: 'Season 2',
+        year: 2017,
+        season: 'spring',
+        episodes: [
+          { number: 1, title: 'Beast Titan', description: 'Un nuevo enemigo aparece.', thumbnail: `${BASE_IMAGE}/seed/aot21/320/180`, duration: 24, airedDate: '2017-04-01' },
+          { number: 2, title: 'Ruler of the Walls', description: 'Historia de los muros.', thumbnail: `${BASE_IMAGE}/seed/aot22/320/180`, duration: 24, airedDate: '2017-04-08' },
+          { number: 3, title: 'Bite', description: 'Eren despierta un nuevo poder.', thumbnail: `${BASE_IMAGE}/seed/aot23/320/180`, duration: 24, airedDate: '2017-04-15' },
+        ]
+      },
+      {
+        id: 's3',
+        name: 'Season 3',
+        year: 2018,
+        season: 'summer',
+        episodes: [
+          { number: 1, title: 'Smoke Signal', description: 'El plan para recuperar Wall Maria.', thumbnail: `${BASE_IMAGE}/seed/aot31/320/180`, duration: 24, airedDate: '2018-07-23' },
+          { number: 2, title: 'The State of the Walls', description: 'La verdadera historia del rey.', thumbnail: `${BASE_IMAGE}/seed/aot32/320/180`, duration: 24, airedDate: '2018-07-30' },
+        ]
+      },
+      {
+        id: 's4',
+        name: 'Season 4',
+        year: 2020,
+        season: 'winter',
+        episodes: [
+          { number: 1, title: 'The Dawn of Remorse', description: 'Los invasores Marleyanos.', thumbnail: `${BASE_IMAGE}/seed/aot41/320/180`, duration: 24, airedDate: '2020-12-07' },
+          { number: 2, title: 'The War Hammer Titan', description: 'Lilly y la familia Yeager.', thumbnail: `${BASE_IMAGE}/seed/aot42/320/180`, duration: 24, airedDate: '2020-12-14' },
+          { number: 3, title: 'Door to Freedom', description: 'La nueva alianza.', thumbnail: `${BASE_IMAGE}/seed/aot43/320/180`, duration: 24, airedDate: '2020-12-21' },
+        ]
+      }
+    ]
   },
   {
     id: '3',

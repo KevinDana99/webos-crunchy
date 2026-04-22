@@ -65,6 +65,11 @@ export function playAnime(anime: Anime, episode: number = 1) {
   };
 }
 
+export function selectAnime(anime: Anime) {
+  currentAnime.value = anime;
+  currentEpisode.value = 1;
+}
+
 export function setActiveCategory(categoryId: string) {
   activeCategory.value = categoryId;
 }
