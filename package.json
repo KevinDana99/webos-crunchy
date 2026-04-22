@@ -31,6 +31,9 @@
     "vite": "^5.0.10"
   },
   "browserslist": [
-    "Chrome 34"
+    "Chrome >= 60",
+    "Firefox >= 55",
+    "Safari >= 11",
+    "Edge >= 79"
   ]
 }

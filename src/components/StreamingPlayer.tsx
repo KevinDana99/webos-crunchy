@@ -21,11 +21,50 @@ export function StreamingPlayer({ onBack }: StreamingPlayerProps) {
     const video = videoRef.current
     if (!video || !anime) return
 
+    // Instalar polyfills de shaka-player para compatibilidad
+    shaka.polyfill.installAll()
+
+    // Verificar soporte del navegador
+    if (!shaka.Player.isBrowserSupported()) {
+      console.error('Shaka Player: Este navegador no es soportado')
+      alert('Tu navegador no es compatible con el reproductor de video. Por favor, actualiza a una versión más reciente de Chrome, Firefox o Safari.')
+      return
+    }
+
     const player = new shaka.Player()
+
+    // Configuración para compatibilidad con navegadores antiguos
+    player.configure({
+      streaming: {
+        bufferBehind: 30,
+        bufferAhead: 30,
+        rebufferingGoal: 2,
+        loadMinForwardProgress: 3,
+      },
+      manifest: {
+        retryParameters: {
+          minTimeout: 1000,
+          maxTimeout: 60000,
+        }
+      },
+      // Codecs compatibles con versiones antiguas de Chrome
+      preferredVideoCodecs: ['avc1.42E01E', 'avc1.58A01E'],
+      preferredAudioCodecs: ['mp4a.40.2'],
+    })
+
     player.attach(video)
 
     player.load(anime.streamUrl).catch((err) => {
-      console.error('Error loading:', err)
+      console.error('Error loading stream:', err)
+      const errorCode = (err as any)?.code || 0
+
+      // Códigos 3014 (MEDIA_SOURCE_OPERATION_FAILED) o 3016 (VIDEO_ERROR)
+      // Indican problemas con MediaSource/EME
+      if ([3014, 3016].includes(errorCode)) {
+        alert('Error al cargar el video. Es posible que tu navegador no soporte Media Source Extensions (MSE). Actualiza Chrome a versión 31+ o usa Firefox 38+.')
+      } else {
+        alert('Error al cargar el video: ' + (err.message || 'Error desconocido'))
+      }
     })
 
     return () => {
