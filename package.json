@@ -5,7 +5,7 @@
   "scripts": {
     "start": "vite dist/index.html",
     "dev": "vite",
-    "build": "tsc && vite build && cp -r src/public/appinfo.json src/public/icons src/public/images dist/",
+    "build": "tsc && vite build && cp -r src/public/appinfo.json src/public/icons src/public/images src/lib/* dist/",
     "preview": "vite preview",
     "build-app": "cd dist && ares-package . --no-minify",
     "install-app": "cd dist && ares-install -d tele2 *.ipk",

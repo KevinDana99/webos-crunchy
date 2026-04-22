@@ -4,11 +4,15 @@ import autoprefixer from 'autoprefixer'
 import postcssCustomProperties from 'postcss-custom-properties'
 import postcssPresetEnv from 'postcss-preset-env'
 
+const webosJsTargets = ['chrome 34']
+// webOS 1.x reports close to Chrome 34, but its CSS engine needs older WebKit prefixes.
+const webosCssPrefixTargets = ['chrome 28', 'chrome 34']
+
 export default defineConfig({
   base: './',
   plugins: [
     legacy({
-      targets: ['chrome 34'],
+      targets: webosJsTargets,
       renderLegacyChunks: true,
       modernPolyfills: false,
       polyfills: true
@@ -25,7 +29,7 @@ export default defineConfig({
         // 2. Transpila CSS moderno (esto incluye el parche para 'gap' en Flexbox)
         postcssPresetEnv({
           stage: 0,
-          browsers: 'chrome 34',
+          browsers: webosCssPrefixTargets,
           features: {
             'custom-properties': false,
             'gap-properties': true // Activa el polyfill para el espacio entre elementos
@@ -33,9 +37,8 @@ export default defineConfig({
         }),
         // 3. Agrega los prefijos -webkit- obligatorios
         autoprefixer({
-          overrideBrowserslist: ['Chrome 34'],
-          // "no-2009" genera la sintaxis de 2012 que webOS 1.x entiende perfectamente
-          flexbox: 'no-2009',
+          overrideBrowserslist: webosCssPrefixTargets,
+          flexbox: true,
           grid: 'autoplace',
           // Evita que el plugin borre prefijos que ya existan o que considere "obsoletos"
           remove: false,
