@@ -18,7 +18,7 @@ export function Header() {
         <button class={styles.menuBtn} onClick={() => showSidebar.value = true}>
           ☰
         </button>
-        <h1 class={styles.logo} onClick={() => route('/')}>CRUNCHYROLL</h1>
+        <button type="button" class={styles.logo} onClick={() => route('/')}>CRUNCHYROLL</button>
       </div>
 
       <form class={styles.searchForm} onSubmit={handleSubmit}>

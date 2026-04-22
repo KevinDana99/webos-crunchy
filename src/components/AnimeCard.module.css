@@ -10,6 +10,10 @@
   transform: scale(1.05);
 }
 
+.card:focus-within {
+  transform: scale(1.05);
+}
+
 .large .imageWrapper {
   aspect-ratio: 16 / 9;
 }
@@ -23,10 +27,22 @@
 }
 
 .imageWrapper {
+  display: block;
+  width: 100%;
   position: relative;
   cursor: pointer;
   overflow: hidden;
   border-radius: 4px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+}
+
+.imageWrapper:focus {
+  outline: 2px solid #F47521;
+  outline-offset: 2px;
 }
 
 .image {
@@ -37,6 +53,10 @@
 }
 
 .card:hover .image {
+  transform: scale(1.1);
+}
+
+.imageWrapper:focus .image {
   transform: scale(1.1);
 }
 
@@ -52,6 +72,10 @@
 }
 
 .card:hover .overlay {
+  opacity: 1;
+}
+
+.imageWrapper:focus .overlay {
   opacity: 1;
 }
 
@@ -143,7 +167,17 @@
   opacity: 1;
 }
 
+.card:focus-within .queueBtn {
+  opacity: 1;
+}
+
 .queueBtn:hover {
   background: #F47521;
   color: #000;
+}
+
+.queueBtn:focus {
+  opacity: 1;
+  outline: 2px solid #F47521;
+  outline-offset: 2px;
 }

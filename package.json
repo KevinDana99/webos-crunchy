@@ -10,7 +10,8 @@
     "build-app": "cd dist && ares-package . --no-minify",
     "install-app": "cd dist && ares-install -d tele2 *.ipk",
     "launch-app": "cd dist && ares-launch -d tele2 com.crunchyroll.aion -i ",
-    "uninstall-app": "ares-install -r com.crunchyroll.aion"
+    "uninstall-app": "ares-install -r com.crunchyroll.aion",
+    "deploy": "bun build-app && bun install-app && bun launch-app"
   },
   "dependencies": {
     "@preact/signals": "^1.2.2",

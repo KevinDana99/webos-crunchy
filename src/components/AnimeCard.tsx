@@ -21,7 +21,7 @@ export function AnimeCard({ anime, size = 'medium', onPlay }: AnimeCardProps) {
 
   return (
     <div class={`${styles.card} ${styles[size]}`}>
-      <div class={styles.imageWrapper} onClick={handlePlay}>
+      <button type="button" class={styles.imageWrapper} onClick={handlePlay}>
         <img src={anime.image} alt={anime.title} class={styles.image} />
         <div class={styles.overlay}>
           <span class={styles.playIcon}>▶</span>
@@ -33,7 +33,7 @@ export function AnimeCard({ anime, size = 'medium', onPlay }: AnimeCardProps) {
         {anime.status === 'ongoing' && (
           <div class={styles.badge}>NEW</div>
         )}
-      </div>
+      </button>
       <div class={styles.info}>
         <h3 class={styles.title}>{anime.title}</h3>
         <div class={styles.meta}>
