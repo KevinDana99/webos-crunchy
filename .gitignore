@@ -2,3 +2,5 @@ node_modules
 minichrome
 examples
 dist
+.DS_Store
+tsconfig.tsbuildinfo
