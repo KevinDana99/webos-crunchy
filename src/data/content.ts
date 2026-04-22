@@ -39,6 +39,10 @@ export const mockAnime: Anime[] = [
     studios: ['Wit Studio', 'MAPPA'],
     season: 'Summer 2013',
     streamUrl: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd',
+    episodesList: [
+      { number: 1, title: 'To You, 2000 Years Later', description: 'Eren testimonia la caída de Shiganshina.', thumbnail: `${BASE_IMAGE}/seed/aot11/320/180`, duration: 24, airedDate: '2013-04-07' },
+      { number: 2, title: 'That Day', description: 'El día en que todo cambió.', thumbnail: `${BASE_IMAGE}/seed/aot12/320/180`, duration: 24, airedDate: '2013-04-14' },
+    ],
     seasons: [
       {
         id: 's1',
