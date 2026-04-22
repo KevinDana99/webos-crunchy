@@ -37,10 +37,13 @@
 
 .info {
   display: flex;
-  gap: 1rem;
   padding: 1.25rem;
   background: rgba(244, 117, 33, 0.1);
   border-bottom: 1px solid #2a2a35;
+}
+
+.info > * + * {
+  margin-left: 1rem;
 }
 
 .thumb {
@@ -71,7 +74,6 @@
 .episode {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
   width: 100%;
   background: transparent;
   border: none;
@@ -80,6 +82,10 @@
   border-radius: 4px;
   text-align: left;
   transition: background 0.2s ease;
+}
+
+.episode > * + * {
+  margin-left: 1rem;
 }
 
 .episode:hover {
@@ -101,7 +107,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+}
+
+.epInfo > * + * {
+  margin-top: 0.25rem;
 }
 
 .epTitle {

@@ -30,8 +30,11 @@
 
 .badges {
   display: flex;
-  gap: 0.5rem;
   margin-bottom: 1rem;
+}
+
+.badges > * + * {
+  margin-left: 0.5rem;
 }
 
 .badge {
@@ -61,10 +64,13 @@
 .meta {
   display: flex;
   align-items: center;
-  gap: 1rem;
   color: #c5c5c5;
   font-size: 0.9rem;
   margin-bottom: 1rem;
+}
+
+.meta > * + * {
+  margin-left: 1rem;
 }
 
 .rating {
@@ -90,8 +96,11 @@
 
 .genres {
   display: flex;
-  gap: 0.5rem;
   margin-bottom: 1.5rem;
+}
+
+.genres > * + * {
+  margin-left: 0.5rem;
 }
 
 .genre {
@@ -101,13 +110,15 @@
 
 .actions {
   display: flex;
-  gap: 0.75rem;
+}
+
+.actions > * + * {
+  margin-left: 0.75rem;
 }
 
 .playBtn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   background: #F47521;
   border: none;
   color: #000;
@@ -117,6 +128,10 @@
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.2s ease;
+}
+
+.playIcon {
+  margin-right: 0.5rem;
 }
 
 .playBtn:hover {

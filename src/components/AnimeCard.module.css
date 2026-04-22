@@ -72,11 +72,11 @@
   border-radius: 2px;
   display: flex;
   align-items: center;
-  gap: 2px;
 }
 
 .ratingIcon {
   font-size: 0.6rem;
+  margin-right: 2px;
 }
 
 .badge {
@@ -107,9 +107,12 @@
 
 .meta {
   display: flex;
-  gap: 0.35rem;
   font-size: 0.7rem;
   color: #8a8a8a;
+}
+
+.meta > * + * {
+  margin-left: 0.35rem;
 }
 
 .dot {

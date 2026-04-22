@@ -14,7 +14,10 @@
 .left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+}
+
+.left > * + * {
+  margin-left: 1rem;
 }
 
 .menuBtn {
@@ -63,13 +66,15 @@
 .right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+}
+
+.right > * + * {
+  margin-left: 0.75rem;
 }
 
 .queueBtn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   background: transparent;
   border: none;
   color: #fff;
@@ -81,6 +86,11 @@
 
 .queueIcon {
   font-size: 1.1rem;
+  margin-right: 0.5rem;
+}
+
+.queueBtn .badge {
+  margin-left: 0.5rem;
 }
 
 .badge {

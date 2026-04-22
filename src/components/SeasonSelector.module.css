@@ -14,8 +14,12 @@
 
 .seasons {
   display: flex;
-  gap: 0.5rem;
   flex-wrap: wrap;
+  margin: -0.25rem;
+}
+
+.seasons > * {
+  margin: 0.25rem;
 }
 
 .seasonBtn {
@@ -28,7 +32,6 @@
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
 .seasonBtn:hover {

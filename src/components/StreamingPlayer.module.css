@@ -23,8 +23,11 @@
 .topBar {
   display: flex;
   align-items: center;
-  gap: 1rem;
   padding: 1rem;
+}
+
+.topBar > * + * {
+  margin-left: 1rem;
 }
 
 .backBtn {
@@ -50,7 +53,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+}
+
+.center > * + * {
+  margin-left: 2rem;
 }
 
 .playBtn {
@@ -82,9 +88,12 @@
 .progress {
   display: flex;
   align-items: center;
-  gap: 1rem;
   color: white;
   font-size: 0.85rem;
+}
+
+.progress > * + * {
+  margin-left: 1rem;
 }
 
 .progressBar {
@@ -107,8 +116,11 @@
 .volume {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   margin-top: 0.5rem;
+}
+
+.volume > * + * {
+  margin-left: 0.5rem;
 }
 
 .volume button {
