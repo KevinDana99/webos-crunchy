@@ -1,4 +1,4 @@
-import { Anime, Category, Season } from '../types';
+import { Anime, Category, Season, StreamingPlatform } from '../types';
 
 const BASE_IMAGE = 'https://picsum.photos';
 
@@ -208,6 +208,49 @@ export const mockSeasons: Season[] = [
   { id: 'summer-2023', name: 'Summer 2023', year: 2023, season: 'summer' },
   { id: 'spring-2023', name: 'Spring 2023', year: 2023, season: 'spring' },
   { id: 'winter-2023', name: 'Winter 2023', year: 2023, season: 'winter' },
+];
+
+export const mockPlatforms: StreamingPlatform[] = [
+  {
+    id: 'crunchyroll',
+    name: 'Crunchyroll',
+    logo: '/icons/platforms/crunchyroll.svg',
+    accentColor: '#f47521',
+    authEndpoint: '/api/crunchyroll/auth',
+    tokenEndpoint: '/api/crunchyroll/token'
+  },
+  {
+    id: 'netflix',
+    name: 'Netflix',
+    logo: '/icons/platforms/netflix.svg',
+    accentColor: '#e50914',
+    authEndpoint: '/api/netflix/auth',
+    tokenEndpoint: '/api/netflix/token'
+  },
+  {
+    id: 'disney',
+    name: 'Disney+',
+    logo: '/icons/platforms/disney.svg',
+    accentColor: '#006e99',
+    authEndpoint: '/api/disney/auth',
+    tokenEndpoint: '/api/disney/token'
+  },
+  {
+    id: 'amazon',
+    name: 'Prime Video',
+    logo: '/icons/platforms/amazon.svg',
+    accentColor: '#00a8e1',
+    authEndpoint: '/api/amazon/auth',
+    tokenEndpoint: '/api/amazon/token'
+  },
+  {
+    id: 'hbo',
+    name: 'HBO Max',
+    logo: '/icons/platforms/hbo.svg',
+    accentColor: '#7538e4',
+    authEndpoint: '/api/hbo/auth',
+    tokenEndpoint: '/api/hbo/token'
+  }
 ];
 
 export function getAnimeById(id: string): Anime | undefined {

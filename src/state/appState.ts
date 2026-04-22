@@ -1,13 +1,18 @@
 import { signal, computed } from '@preact/signals';
-import { Anime, PlayerState } from '../types';
-import { mockAnime, mockCategories, mockSeasons, searchAnime } from '../data/content';
+import { Anime, PlayerState, StreamingPlatform, AuthUser } from '../types';
+import { mockAnime, mockCategories, mockSeasons, searchAnime, mockPlatforms } from '../data/content';
 
 export const animeList = signal(mockAnime);
 export const categories = signal(mockCategories);
 export const seasons = signal(mockSeasons);
+export const streamingPlatforms = signal(mockPlatforms);
 
 export const currentAnime = signal<Anime | null>(null);
 export const currentEpisode = signal(1);
+export const currentPlatform = signal<StreamingPlatform | null>(mockPlatforms[0]);
+export const authUser = signal<AuthUser | null>(null);
+export const isAuthenticated = computed(() => !!authUser.value && authUser.value.expiresAt > Date.now());
+
 export const queue = signal<string[]>([]);
 export const searchQuery = signal('');
 export const activeCategory = signal<string>('trending');
@@ -80,4 +85,36 @@ export function setActiveSeason(seasonId: string) {
 
 export function setSearchQuery(query: string) {
   searchQuery.value = query;
+}
+
+export async function authenticate(platform: StreamingPlatform, email: string, password: string): Promise<AuthUser | null> {
+  // Mock authentication - simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  // Mock valid credentials check
+  if (email && password && password.length >= 4) {
+    const user: AuthUser = {
+      id: `${platform.id}-${Date.now()}`,
+      email,
+      username: email.split('@')[0],
+      platform: platform.id,
+      token: `${platform.id}-token-${Math.random().toString(36).substring(7)}`,
+      expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+    };
+    
+    authUser.value = user;
+    currentPlatform.value = platform;
+    return user;
+  }
+  
+  return null;
+}
+
+export function logout() {
+  authUser.value = null;
+  currentPlatform.value = mockPlatforms[0];
+}
+
+export function selectPlatform(platform: StreamingPlatform) {
+  currentPlatform.value = platform;
 }

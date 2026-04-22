@@ -46,6 +46,25 @@ export interface Season {
   season: 'winter' | 'spring' | 'summer' | 'fall';
 }
 
+export interface StreamingPlatform {
+  id: string;
+  name: string;
+  logo: string;
+  accentColor: string;
+  authEndpoint: string;
+  tokenEndpoint: string;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  username: string;
+  avatar?: string;
+  platform: string;
+  token: string;
+  expiresAt: number;
+}
+
 export interface PlayerState {
   playing: boolean;
   currentTime: number;
