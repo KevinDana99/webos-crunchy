@@ -52,13 +52,12 @@
 
 .platformSelector {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin: -4px -4px 1rem;
 }
 
-.platformSelector > * + * {
-  margin-left: 8px;
+.platformSelector > * {
+  margin: 4px;
 }
 
 .platformBtn {
@@ -91,12 +90,19 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 4px;
+  border-radius: 4px;
+  background: var(--platform-color);
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0;
 }
 
 .platformLogo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 .platformName {
@@ -227,13 +233,28 @@
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s ease;
-  gap: 0.75rem;
 }
 
 .socialIcon {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  border-radius: 50%;
+  background: #fff;
+  color: #111;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.socialIcon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .socialBtn span {

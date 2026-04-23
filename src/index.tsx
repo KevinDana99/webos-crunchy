@@ -5,15 +5,98 @@ import { WatchPage } from './pages/streaming/WatchPage'
 import { LoginPage } from './pages/streaming/LoginPage'
 import { DetailPage } from './pages/streaming/DetailPage'
 import './styles/app.css'
-import eruda from 'eruda'
 
-eruda.init({
-  defaults: {
-    displaySize: 50,
-    transparency: 0.9
+function installLegacyPolyfills() {
+  // Shaka and some routing/debug tooling expect Shadow DOM-era event APIs.
+  if (typeof Event !== 'undefined' && !Event.prototype.composedPath) {
+    Event.prototype.composedPath = function () {
+      const legacyEvent = this as Event & { path?: EventTarget[] }
+
+      if (legacyEvent.path) {
+        return legacyEvent.path
+      }
+
+      let target = legacyEvent.target as Node | null
+      const path: EventTarget[] = []
+
+      while (target) {
+        path.push(target)
+        target = target.parentNode
+      }
+
+      path.push(document)
+      path.push(window)
+
+      return path
+    }
   }
-})
-document.body.style.backgroundColor = 'red'
+
+  if (!Object.values) {
+    Object.values = function values(obj: object) {
+      return Object.keys(obj).map((key) => (obj as Record<string, unknown>)[key])
+    }
+  }
+
+  if (!Object.entries) {
+    Object.entries = function entries(obj: object) {
+      return Object.keys(obj).map((key) => {
+        return [key, (obj as Record<string, unknown>)[key]] as [string, unknown]
+      })
+    }
+  }
+
+  if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function startsWith(search: string, pos?: number) {
+      const position = pos || 0
+      return this.substr(position, search.length) === search
+    }
+  }
+
+  if (!String.prototype.endsWith) {
+    String.prototype.endsWith = function endsWith(search: string, length?: number) {
+      const source = String(this)
+      const end = length === undefined ? source.length : Math.min(length, source.length)
+      return source.substring(end - search.length, end) === search
+    }
+  }
+}
+
+installLegacyPolyfills()
+
+// Conditionally load eruda based on environment or config
+const shouldLoadEruda = import.meta.env.DEV || import.meta.env.VITE_ERUDA_ENABLED === 'true';
+
+if (shouldLoadEruda) {
+  // Load Eruda asynchronously without blocking page rendering
+  // Use Promise.race with timeout to prevent hanging
+  Promise.race([
+    import('eruda'),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Eruda load timeout')), 3000))
+  ])
+    .then((erudaModule: any) => {
+      try {
+        erudaModule.default.init({
+          defaults: {
+            container: document.body,
+            displaySize: 50,
+            transparency: 0.9,
+          },
+        });
+        console.log('Eruda initialized successfully');
+      } catch (initError) {
+        console.error('Eruda initialization failed:', initError);
+        // Clean up any partially loaded elements
+        const erudaContainer = document.getElementById('eruda-container');
+        if (erudaContainer) {
+          erudaContainer.remove();
+        }
+      }
+    })
+    .catch((error) => {
+      console.warn('Eruda could not be loaded:', error.message);
+      // Silently fail - Eruda is optional debugging tool
+    });
+}
 
 const SCROLL_STEP = 300
 
@@ -43,7 +126,8 @@ function elementMatches(element: HTMLElement, selector: string) {
   const matcher =
     element.matches ||
     element.webkitMatchesSelector ||
-    (element as HTMLElement & { msMatchesSelector?: typeof element.matches }).msMatchesSelector
+    (element as HTMLElement & { msMatchesSelector?: typeof element.matches })
+      .msMatchesSelector
 
   return matcher ? matcher.call(element, selector) : false
 }
@@ -51,7 +135,11 @@ function elementMatches(element: HTMLElement, selector: string) {
 function findFocusableTarget(target: EventTarget | null) {
   let element = target as HTMLElement | null
 
-  while (element && element !== document.body && element !== document.documentElement) {
+  while (
+    element &&
+    element !== document.body &&
+    element !== document.documentElement
+  ) {
     if (elementMatches(element, FOCUSABLE_SELECTOR)) {
       return element
     }
@@ -65,7 +153,11 @@ function findFocusableTarget(target: EventTarget | null) {
 function findScrollableElement(target: EventTarget | null) {
   let element = target as HTMLElement | null
 
-  while (element && element !== document.body && element !== document.documentElement) {
+  while (
+    element &&
+    element !== document.body &&
+    element !== document.documentElement
+  ) {
     const styles = window.getComputedStyle(element)
     const overflowY = styles.overflowY || styles.overflow
 
@@ -93,10 +185,10 @@ function scrollPage(deltaY: number, target?: EventTarget | null) {
 
   const root = document.documentElement
   const body = document.body
-  
+
   root.scrollTop -= deltaY
   body.scrollTop -= deltaY
-  
+
   if (root.scrollTop > 0 || body.scrollTop > 0) {
     return
   }
@@ -111,11 +203,17 @@ function getWheelDelta(event: Event) {
     return legacyEvent.deltaY
   }
 
-  if (typeof legacyEvent.wheelDeltaY === 'number' && legacyEvent.wheelDeltaY !== 0) {
+  if (
+    typeof legacyEvent.wheelDeltaY === 'number' &&
+    legacyEvent.wheelDeltaY !== 0
+  ) {
     return legacyEvent.wheelDeltaY
   }
 
-  if (typeof legacyEvent.wheelDelta === 'number' && legacyEvent.wheelDelta !== 0) {
+  if (
+    typeof legacyEvent.wheelDelta === 'number' &&
+    legacyEvent.wheelDelta !== 0
+  ) {
     return legacyEvent.wheelDelta
   }
 
@@ -157,11 +255,21 @@ function getKeyScrollDelta(event: KeyboardEvent) {
   const key = event.key || ''
   const keyCode = event.keyCode || event.which
 
-  if (key === 'PageUp' || key === 'ArrowUp' || keyCode === 33 || keyCode === 38) {
+  if (
+    key === 'PageUp' ||
+    key === 'ArrowUp' ||
+    keyCode === 33 ||
+    keyCode === 38
+  ) {
     return -SCROLL_STEP
   }
 
-  if (key === 'PageDown' || key === 'ArrowDown' || keyCode === 34 || keyCode === 40) {
+  if (
+    key === 'PageDown' ||
+    key === 'ArrowDown' ||
+    keyCode === 34 ||
+    keyCode === 40
+  ) {
     return SCROLL_STEP
   }
 

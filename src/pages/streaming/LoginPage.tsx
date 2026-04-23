@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
-import { streamingPlatforms, currentPlatform, authenticate, selectPlatform } from '../../state/appState';
+import { streamingPlatforms, currentPlatform, authenticate, register, selectPlatform } from '../../state/appState';
 import { StreamingPlatform } from '../../types';
 import styles from './LoginPage.module.css';
 
@@ -12,11 +12,29 @@ export function LoginPage() {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [selectedPlatform, setSelectedPlatform] = useState<StreamingPlatform>(currentPlatform.value!);
 
   const handlePlatformSelect = (platform: StreamingPlatform) => {
     setSelectedPlatform(platform);
     selectPlatform(platform);
+  };
+
+  const getPlatformMark = (platform: StreamingPlatform) => {
+    return platform.name
+      .replace('+', '')
+      .split(' ')
+      .map((part) => part.charAt(0))
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+  };
+
+  const markImageFailed = (key: string) => {
+    setFailedImages((current) => ({
+      ...current,
+      [key]: true
+    }));
   };
 
   const handleSubmit = async (e: Event) => {
@@ -31,7 +49,13 @@ export function LoginPage() {
     setLoading(true);
     
     try {
-      const user = await authenticate(selectedPlatform, email, password);
+      const user = isLogin
+        ? await authenticate(selectedPlatform, email, password)
+        : await register(selectedPlatform, {
+          email,
+          password,
+          username: username || email.split('@')[0]
+        });
       
       if (user) {
         route('/');
@@ -66,7 +90,14 @@ export function LoginPage() {
               onClick={() => handlePlatformSelect(platform)}
             >
               <span class={styles.platformLogo}>
-                <img src={platform.logo} alt={`${platform.name} logo`} />
+                {!failedImages[platform.id] && (
+                  <img
+                    src={platform.logo}
+                    alt={`${platform.name} logo`}
+                    onError={() => markImageFailed(platform.id)}
+                  />
+                )}
+                {failedImages[platform.id] && getPlatformMark(platform)}
               </span>
               <span class={styles.platformName}>{platform.name}</span>
             </button>
@@ -135,11 +166,29 @@ export function LoginPage() {
 
         <div class={styles.social}>
           <button class={styles.socialBtn}>
-            <img src="/icons/social/google.svg" alt="Google" class={styles.socialIcon} />
+            <span class={styles.socialIcon}>
+              {!failedImages.google && (
+                <img
+                  src="/icons/social/google.png"
+                  alt=""
+                  onError={() => markImageFailed('google')}
+                />
+              )}
+              {failedImages.google && 'G'}
+            </span>
             Continue with Google
           </button>
           <button class={styles.socialBtn}>
-            <img src="/icons/social/facebook.svg" alt="Facebook" class={styles.socialIcon} />
+            <span class={styles.socialIcon}>
+              {!failedImages.facebook && (
+                <img
+                  src="/icons/social/facebook.png"
+                  alt=""
+                  onError={() => markImageFailed('facebook')}
+                />
+              )}
+              {failedImages.facebook && 'f'}
+            </span>
             Continue with Facebook
           </button>
         </div>

@@ -4,7 +4,7 @@ import autoprefixer from 'autoprefixer'
 import postcssCustomProperties from 'postcss-custom-properties'
 import postcssPresetEnv from 'postcss-preset-env'
 
-const webosJsTargets = ['chrome 34']
+const webosJsTargets = ['chrome 28']
 const webosCssPrefixTargets = ['chrome 28', 'chrome 34']
 
 export default defineConfig({
@@ -46,6 +46,7 @@ export default defineConfig({
     cssTarget: 'chrome34',
     minify: 'terser',
     cssCodeSplit: true,
+    sourcemap: true, // Enable source maps for debugging
     terserOptions: {
       compress: {
         keep_fnames: true
