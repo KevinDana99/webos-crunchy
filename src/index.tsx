@@ -63,39 +63,174 @@ function installLegacyPolyfills() {
 
 installLegacyPolyfills()
 
-// Conditionally load eruda based on environment or config
-const shouldLoadEruda = import.meta.env.DEV || import.meta.env.VITE_ERUDA_ENABLED === 'true';
+type DebugMode = 'off' | 'lite' | 'eruda'
 
-if (shouldLoadEruda) {
-  // Load Eruda asynchronously without blocking page rendering
-  // Use Promise.race with timeout to prevent hanging
-  Promise.race([
-    import('eruda'),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Eruda load timeout')), 3000))
-  ])
-    .then((erudaModule: any) => {
-      try {
-        erudaModule.default.init({
-          defaults: {
-            container: document.body,
-            displaySize: 50,
-            transparency: 0.9,
-          },
-        });
-        console.log('Eruda initialized successfully');
-      } catch (initError) {
-        console.error('Eruda initialization failed:', initError);
-        // Clean up any partially loaded elements
-        const erudaContainer = document.getElementById('eruda-container');
-        if (erudaContainer) {
-          erudaContainer.remove();
+type DebugWindow = Window & {
+  __AION_ERRORS__?: string[]
+}
+
+function getQueryParam(name: string) {
+  const query = window.location.search ? window.location.search.substring(1) : ''
+  if (!query) return ''
+
+  const parts = query.split('&')
+  for (let i = 0; i < parts.length; i += 1) {
+    const pair = parts[i].split('=')
+    const key = decodeURIComponent(pair[0] || '')
+    if (key === name) {
+      return decodeURIComponent(pair[1] || '')
+    }
+  }
+
+  return ''
+}
+
+function getStoredDebugMode() {
+  try {
+    return window.localStorage
+      ? window.localStorage.getItem('aionDebug') || ''
+      : ''
+  } catch (_error) {
+    return ''
+  }
+}
+
+function getDebugMode(): DebugMode {
+  const requestedMode = getQueryParam('debug') || getStoredDebugMode()
+
+  if (requestedMode === 'off') return 'off'
+  if (requestedMode === 'eruda') return 'eruda'
+  if (requestedMode === 'lite') return 'lite'
+  if (import.meta.env.VITE_ERUDA_ENABLED === 'true') return 'eruda'
+  if (import.meta.env.VITE_DEBUG_OVERLAY === 'true') return 'lite'
+
+  return 'eruda'
+}
+
+function formatErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.stack || error.message
+  }
+
+  if (typeof error === 'string') {
+    return error
+  }
+
+  try {
+    return JSON.stringify(error)
+  } catch (_jsonError) {
+    return String(error)
+  }
+}
+
+function updateLiteDebugOverlay() {
+  const output = document.getElementById('aion-debug-output')
+  if (!output) return
+
+  const debugWindow = window as DebugWindow
+  output.textContent = (debugWindow.__AION_ERRORS__ || []).join('\n\n')
+}
+
+function pushDebugError(message: string) {
+  const debugWindow = window as DebugWindow
+  const errors = debugWindow.__AION_ERRORS__ || []
+
+  errors.push(message)
+  debugWindow.__AION_ERRORS__ = errors.slice(Math.max(errors.length - 8, 0))
+  updateLiteDebugOverlay()
+}
+
+function installGlobalErrorCapture() {
+  window.addEventListener('error', (event) => {
+    const location = event.filename
+      ? ` (${event.filename}:${event.lineno || 0}:${event.colno || 0})`
+      : ''
+    const message = event.error
+      ? formatErrorMessage(event.error)
+      : event.message
+
+    pushDebugError(`Error${location}\n${message}`)
+  })
+
+  window.addEventListener('unhandledrejection', (event) => {
+    pushDebugError(`Unhandled promise\n${formatErrorMessage(event.reason)}`)
+  })
+}
+
+function createLiteDebugOverlay() {
+  if (document.getElementById('aion-debug-panel')) return
+
+  const panel = document.createElement('div')
+  panel.id = 'aion-debug-panel'
+  panel.style.position = 'fixed'
+  panel.style.left = '0'
+  panel.style.right = '0'
+  panel.style.bottom = '0'
+  panel.style.zIndex = '2147483647'
+  panel.style.maxHeight = '45vh'
+  panel.style.overflow = 'auto'
+  panel.style.padding = '10px'
+  panel.style.background = 'rgba(0, 0, 0, 0.88)'
+  panel.style.color = '#ffffff'
+  panel.style.fontFamily = 'monospace'
+  panel.style.fontSize = '13px'
+  panel.style.lineHeight = '1.35'
+  panel.style.whiteSpace = 'pre-wrap'
+  panel.style.setProperty('-webkit-overflow-scrolling', 'touch')
+
+  const output = document.createElement('pre')
+  output.id = 'aion-debug-output'
+  output.style.margin = '0'
+  output.textContent = 'Aion debug listo. Todavia no hay errores.'
+
+  panel.appendChild(output)
+  document.body.appendChild(panel)
+  updateLiteDebugOverlay()
+}
+
+function removeErudaNodes() {
+  const ids = ['eruda', 'eruda-container']
+
+  for (let i = 0; i < ids.length; i += 1) {
+    const node = document.getElementById(ids[i])
+    if (node && node.parentNode) {
+      node.parentNode.removeChild(node)
+    }
+  }
+}
+
+function loadErudaWhenIdle() {
+  window.setTimeout(() => {
+    import('eruda')
+      .then((erudaModule: any) => {
+        try {
+          erudaModule.default.init({
+            defaults: {
+              displaySize: 50,
+              transparency: 0.9,
+            },
+          })
+        } catch (initError) {
+          removeErudaNodes()
+          pushDebugError(`Eruda init failed\n${formatErrorMessage(initError)}`)
         }
-      }
-    })
-    .catch((error) => {
-      console.warn('Eruda could not be loaded:', error.message);
-      // Silently fail - Eruda is optional debugging tool
-    });
+      })
+      .catch((error) => {
+        pushDebugError(`Eruda load failed\n${formatErrorMessage(error)}`)
+      })
+  }, 1500)
+}
+
+installGlobalErrorCapture()
+
+const debugMode = getDebugMode()
+if (debugMode === 'lite') {
+  if (document.body) createLiteDebugOverlay()
+  else window.addEventListener('DOMContentLoaded', createLiteDebugOverlay)
+}
+
+if (debugMode === 'eruda') {
+  loadErudaWhenIdle()
 }
 
 const SCROLL_STEP = 300

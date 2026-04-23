@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_ERUDA_ENABLED: string;
+  readonly VITE_DEBUG_OVERLAY: string;
 }
 
 declare module '*.module.css' {
