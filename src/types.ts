@@ -21,7 +21,9 @@ export interface Anime {
   episodesList?: Episode[];
   seasons?: AnimeSeason[];
   season?: string;
-  streamUrl: string;
+  streamUrl: string;          // DASH (.mpd)
+  streamUrlHls?: string;      // HLS (.m3u8) - para Chrome 34+
+  streamUrlMp4?: string;      // MP4 directo - para Chrome 26-33
 }
 
 export interface Episode {

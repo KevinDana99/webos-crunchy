@@ -10,7 +10,7 @@
         "eruda": "^3.4.3",
         "preact": "^10.19.3",
         "preact-iso": "^2.11.1",
-        "shaka-player": "^4.7.0",
+        "shaka-player": "3.2.21",
       },
       "devDependencies": {
         "@types/node": "^20.10.5",
@@ -478,6 +478,8 @@
 
     "electron-to-chromium": ["electron-to-chromium@1.5.343", "", {}, "sha512-YHnQ3MXI08icvL9ZKnEBy05F2EQ8ob01UaMOuMbM8l+4UcAq6MPPbBTJBbsBUg3H8JeZNt+O4fjsoWth3p6IFg=="],
 
+    "eme-encryption-scheme-polyfill": ["eme-encryption-scheme-polyfill@2.2.4", "", {}, "sha512-04RxnYXZhddE7VFZ8OPoCR5lX1agj9vp1WIr4YfZgx3rMuYLQl0V1ycb9cw9HvW9kIefXqeFDrCUsy2regUguw=="],
+
     "eruda": ["eruda@3.4.3", "", {}, "sha512-J2TsF4dXSspOXev5bJ6mljv0dRrxj21wklrDzbvPmYaEmVoC+2psylyRi70nUPFh1mTQfIBsSusUtAMZtUN+/w=="],
 
     "es-define-property": ["es-define-property@1.0.1", "", {}, "sha512-e3nRfgfUZ4rNGL232gUgX06QNyyez04KdjFrF+LTRoOXmrOgFKDg4BCdsjW8EnT69eqdYGmRpJwiPVYNrCaW3g=="],
@@ -634,7 +636,7 @@
 
     "semver": ["semver@6.3.1", "", { "bin": "bin/semver.js" }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
-    "shaka-player": ["shaka-player@4.16.28", "", {}, "sha512-sc8MP8fUhrM3iucO55Aom2DmkbcIUG+WpPwdLVyrSKJQDO6PcLJBEWGewkaMGqX6nEKGc87ph5r1NRQoicIzFw=="],
+    "shaka-player": ["shaka-player@3.2.21", "", { "dependencies": { "eme-encryption-scheme-polyfill": "^2.1.1" } }, "sha512-C1Y+V0ZGeF2j6PDBq5kLHiw8yqCSvnNxBkchNFbfctKIlqjf2n+4zL1GfvyKaScq11aUts985AwvrC3HU1zP4A=="],
 
     "source-map": ["source-map@0.6.1", "", {}, "sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g=="],
 

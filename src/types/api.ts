@@ -52,6 +52,7 @@ export interface AuthSession {
 
 export interface PlatformCatalog {
   platform: StreamingPlatform
+  anime: Anime[]
   categories: Category[]
   seasons: Season[]
   featured: Anime[]

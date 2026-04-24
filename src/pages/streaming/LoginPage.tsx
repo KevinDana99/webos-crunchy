@@ -37,7 +37,7 @@ export function LoginPage() {
     }));
   };
 
-  const handleSubmit = async (e: Event) => {
+  const handleSubmit = (e: Event) => {
     e.preventDefault();
     setError('');
     
@@ -48,24 +48,28 @@ export function LoginPage() {
 
     setLoading(true);
     
-    try {
-      const user = isLogin
-        ? await authenticate(selectedPlatform, email, password)
-        : await register(selectedPlatform, {
-          email,
-          password,
-          username: username || email.split('@')[0]
-        });
-      
-      if (user) {
-        route('/');
-      } else {
-        setError('Invalid credentials');
-      }
-    } catch (err) {
-      setError('Authentication failed');
-    } finally {
-      setLoading(false);
+    if (isLogin) {
+      authenticate(selectedPlatform, email, password, (user) => {
+        setLoading(false);
+        if (user) {
+          route('/');
+        } else {
+          setError('Invalid credentials');
+        }
+      });
+    } else {
+      register(selectedPlatform, {
+        email,
+        password,
+        username: username || email.split('@')[0]
+      }, (user) => {
+        setLoading(false);
+        if (user) {
+          route('/');
+        } else {
+          setError('Invalid credentials');
+        }
+      });
     }
   };
 
@@ -200,9 +204,12 @@ export function LoginPage() {
         </p>
       </div>
 
-      <button class={styles.skipBtn} onClick={() => route('/')}>
-        Skip for now →
-      </button>
+        <button class={styles.skipBtn} onClick={() => {
+          selectPlatform(selectedPlatform);
+          route('/');
+        }}>
+          Skip for now →
+        </button>
     </div>
   );
 }

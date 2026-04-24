@@ -53,6 +53,26 @@ export default defineConfig({
       },
       mangle: true,
       safari10: true
+    },
+    rollupOptions: {
+      output: {
+        // Nombres fijos para archivos legacy (sin hash)
+        entryFileNames: (chunkInfo) => {
+          // Para el legacy chunk y los polyfills, usar nombre fijo
+          if (chunkInfo.name && (chunkInfo.name.includes('legacy') || chunkInfo.name.includes('polyfills'))) {
+            return '[name].js'
+          }
+          return 'assets/[name]-[hash].js'
+        },
+        chunkFileNames: (chunkInfo) => {
+          // Shaka y Eruda mantener nombre fijo para carga por <script>
+          if (chunkInfo.name && (chunkInfo.name.includes('shaka') || chunkInfo.name.includes('eruda'))) {
+            return '[name].js'
+          }
+          return 'assets/[name]-[hash].js'
+        },
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
     }
   }
 })

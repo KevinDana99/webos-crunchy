@@ -2,25 +2,24 @@
   "name": "webos-tv-app",
   "version": "1.0.0",
   "type": "module",
-  "scripts": {
-    "start": "vite dist/index.html",
-    "dev": "vite",
-    "build": "tsc && vite build && cp -r src/public/appinfo.json src/public/icons src/public/images src/lib/* dist/",
-    "preview": "vite preview",
-    "build-app": "cd dist && ares-package . --no-minify",
-    "install-app": "cd dist && ares-install -d tele2 *.ipk",
-    "launch-app": "cd dist && ares-launch -d tele2 com.crunchyroll.aion -i ",
-    "uninstall-app": "ares-install -r com.crunchyroll.aion",
-    "deploy": "bun build-app && bun install-app && bun launch-app"
-  },
-  "dependencies": {
-    "@preact/signals": "^1.2.2",
-    "axios": "^1.6.2",
-    "eruda": "^3.4.3",
-    "preact": "^10.19.3",
-    "preact-iso": "^2.11.1",
-    "shaka-player": "^4.7.0"
-  },
+   "scripts": {
+     "start": "vite dist/index.html",
+     "dev": "vite",
+      "build": "tsc && vite build && cp -r src/public/appinfo.json src/public/icons src/public/images src/lib/* dist/",
+     "preview": "vite preview",
+     "build-app": "cd dist && ares-package . --no-minify",
+     "install-app": "cd dist && ares-install -d tele2 *.ipk",
+     "launch-app": "cd dist && ares-launch -d tele2 com.crunchyroll.aion -i ",
+     "uninstall-app": "ares-install -r com.crunchyroll.aion",
+     "deploy": "bun build-app && bun install-app && bun launch-app"
+   },
+    "dependencies": {
+      "@preact/signals": "^1.2.2",
+      "axios": "^1.6.2",
+      "eruda": "^3.4.3",
+      "preact": "^10.19.3",
+      "preact-iso": "^2.11.1"
+    },
   "devDependencies": {
     "@types/node": "^20.10.5",
     "@vitejs/plugin-legacy": "^5.2.0",

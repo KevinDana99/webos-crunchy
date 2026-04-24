@@ -9,7 +9,7 @@ interface AnimeCardProps {
 }
 
 export function AnimeCard({ anime, size = 'medium', onPlay }: AnimeCardProps) {
-  const inQueue = isInQueue.value(anime.id);
+  const inQueue = isInQueue(anime.id);
 
   const handlePlay = () => {
     if (onPlay) {

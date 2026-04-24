@@ -67,6 +67,7 @@ type DebugMode = 'off' | 'lite' | 'eruda'
 
 type DebugWindow = Window & {
   __AION_ERRORS__?: string[]
+  __AION_DEBUG_PUSH__?: (message: string) => void
 }
 
 function getQueryParam(name: string) {
@@ -104,7 +105,7 @@ function getDebugMode(): DebugMode {
   if (import.meta.env.VITE_ERUDA_ENABLED === 'true') return 'eruda'
   if (import.meta.env.VITE_DEBUG_OVERLAY === 'true') return 'lite'
 
-  return 'eruda'
+  return 'lite'
 }
 
 function formatErrorMessage(error: unknown) {
@@ -140,20 +141,40 @@ function pushDebugError(message: string) {
   updateLiteDebugOverlay()
 }
 
+function installConsoleCapture() {
+  const consoleRef = window.console
+  const originalError = consoleRef.error
+  const originalWarn = consoleRef.warn
+
+  consoleRef.error = function patchedError(...args: unknown[]) {
+    pushDebugError(`console.error\n${args.map(formatErrorMessage).join('\n')}`)
+    return originalError.apply(consoleRef, args as any[])
+  }
+
+  consoleRef.warn = function patchedWarn(...args: unknown[]) {
+    pushDebugError(`console.warn\n${args.map(formatErrorMessage).join('\n')}`)
+    return originalWarn.apply(consoleRef, args as any[])
+  }
+
+  ;(window as DebugWindow).__AION_DEBUG_PUSH__ = pushDebugError
+}
+
 function installGlobalErrorCapture() {
   window.addEventListener('error', (event) => {
-    const location = event.filename
-      ? ` (${event.filename}:${event.lineno || 0}:${event.colno || 0})`
+    var location = event.filename
+      ? ' (' + event.filename + ':' + (event.lineno || 0) + ':' + (event.colno || 0) + ')'
       : ''
-    const message = event.error
+    var message = event.error
       ? formatErrorMessage(event.error)
       : event.message
 
-    pushDebugError(`Error${location}\n${message}`)
+    pushDebugError('Error' + location + '\n' + message)
   })
 
   window.addEventListener('unhandledrejection', (event) => {
-    pushDebugError(`Unhandled promise\n${formatErrorMessage(event.reason)}`)
+    pushDebugError('Unhandled promise\n' + formatErrorMessage(event.reason))
+    // Prevenir que el error aparezca en consola
+    event.preventDefault()
   })
 }
 
@@ -199,29 +220,35 @@ function removeErudaNodes() {
   }
 }
 
-function loadErudaWhenIdle() {
+function loadErudaWhenIdle(): void {
   window.setTimeout(() => {
-    import('eruda')
-      .then((erudaModule: any) => {
-        try {
-          erudaModule.default.init({
+    var script = document.createElement('script');
+    script.src = 'eruda.js';
+    script.onload = function() {
+      try {
+        var erudaGlobal = (window as any).eruda;
+        if (erudaGlobal && erudaGlobal.init) {
+          erudaGlobal.init({
             defaults: {
               displaySize: 50,
               transparency: 0.9,
             },
-          })
-        } catch (initError) {
-          removeErudaNodes()
-          pushDebugError(`Eruda init failed\n${formatErrorMessage(initError)}`)
+          });
         }
-      })
-      .catch((error) => {
-        pushDebugError(`Eruda load failed\n${formatErrorMessage(error)}`)
-      })
-  }, 1500)
+      } catch (initError) {
+        removeErudaNodes();
+        pushDebugError('Eruda init failed\n' + formatErrorMessage(initError));
+      }
+    };
+    script.onerror = function() {
+      pushDebugError('Eruda load failed - script error');
+    };
+    document.head.appendChild(script);
+  }, 1500);
 }
 
 installGlobalErrorCapture()
+installConsoleCapture()
 
 const debugMode = getDebugMode()
 if (debugMode === 'lite') {
