@@ -59,6 +59,13 @@ export interface PlatformCatalog {
   continueWatching: Anime[]
 }
 
+export interface PagedContentResult {
+  platform: PlatformCatalog
+  page: number
+  limit: number
+  total: number
+}
+
 export interface ContentQuery {
   platformId?: string
   kind?: ContentKind

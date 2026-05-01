@@ -24,6 +24,8 @@ export interface Anime {
   streamUrl: string;          // DASH (.mpd)
   streamUrlHls?: string;      // HLS (.m3u8) - para Chrome 34+
   streamUrlMp4?: string;      // MP4 directo - para Chrome 26-33
+  externalId?: string;
+  streamsLink?: string;
 }
 
 export interface Episode {

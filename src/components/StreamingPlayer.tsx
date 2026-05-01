@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { playerState, currentAnime, currentEpisode } from '../state/appState'
+import { backendPrepareStream } from '../api/backendApi'
+import {
+  playerState,
+  currentAnime,
+  currentEpisode,
+  currentPlatform,
+  currentPlaybackUrl,
+  authSession,
+  ensureFreshSession,
+  refreshAuthSession,
+} from '../state/appState'
 import styles from './StreamingPlayer.module.css'
 
 type DebugWindow = Window & {
@@ -42,10 +52,12 @@ export function StreamingPlayer({ onBack }: StreamingPlayerProps) {
   const [showControls, setShowControls] = useState(true)
   const [hideTimeout, setHideTimeout] = useState<number | null>(null)
   const [playerError, setPlayerError] = useState('')
-  const [usingFallback, setUsingFallback] = useState(false)
+  const [streamPreparing, setStreamPreparing] = useState(false)
 
   const anime = currentAnime.value
   const episodeNum = currentEpisode.value
+  const platform = currentPlatform.value
+  const playbackUrl = currentPlaybackUrl.value
   const state = playerState.value
 
   const pushDebug = (message: string) => {
@@ -80,18 +92,85 @@ export function StreamingPlayer({ onBack }: StreamingPlayerProps) {
     if (!video || !anime) return
 
     playbackPreparedRef.current = false
+    currentPlaybackUrl.value = ''
     video.removeAttribute('src')
     video.load()
 
-    setPlayerError('Tap para reproducir')
-    setUsingFallback(false)
+    setPlayerError('Preparando stream...')
+    setStreamPreparing(true)
     pushDebug(`player:start`)
 
+    if (!platform) {
+      setPlayerError('No hay plataforma activa.')
+      setStreamPreparing(false)
+      return
+    }
+
+    let cancelled = false
+    ensureFreshSession(function() {
+      backendPrepareStream(
+        platform,
+        authSession.value ? authSession.value.accessToken : undefined,
+        anime,
+        episodeNum,
+        function onPrepared(response) {
+          if (cancelled) return
+
+          if ('error' in response && response.error.status === 401) {
+            refreshAuthSession(function(success) {
+              if (!success || cancelled) {
+                setPlayerError(response.error.message || 'No se pudo preparar el stream.')
+                setStreamPreparing(false)
+                pushDebug(`player:prepare-error\n${response.error.message || 'unknown'}`)
+                return
+              }
+
+              backendPrepareStream(
+                platform,
+                authSession.value ? authSession.value.accessToken : undefined,
+                anime,
+                episodeNum,
+                function onRetriedPrepared(retriedResponse) {
+                  if (cancelled) return
+
+                  if ('error' in retriedResponse) {
+                    setPlayerError(retriedResponse.error.message || 'No se pudo preparar el stream.')
+                    setStreamPreparing(false)
+                    pushDebug(`player:prepare-error\n${retriedResponse.error.message || 'unknown'}`)
+                    return
+                  }
+
+                  currentPlaybackUrl.value = retriedResponse.data.playbackUrl
+                  setPlayerError('Tap para reproducir')
+                  setStreamPreparing(false)
+                  pushDebug(`player:prepared url=${retriedResponse.data.playbackUrl}`)
+                }
+              )
+            }, platform)
+            return
+          }
+
+          if ('error' in response) {
+            setPlayerError(response.error.message || 'No se pudo preparar el stream.')
+            setStreamPreparing(false)
+            pushDebug(`player:prepare-error\n${response.error.message || 'unknown'}`)
+            return
+          }
+
+          currentPlaybackUrl.value = response.data.playbackUrl
+          setPlayerError('Tap para reproducir')
+          setStreamPreparing(false)
+          pushDebug(`player:prepared url=${response.data.playbackUrl}`)
+        }
+      )
+    })
+
     return () => {
+      cancelled = true
       video.removeAttribute('src')
       video.load()
     }
-  }, [anime?.id])
+  }, [anime?.id, episodeNum, platform?.id])
 
   const preparePlayback = (video: HTMLVideoElement): 'ready' | 'waiting' | 'error' => {
     if (!anime) {
@@ -105,30 +184,34 @@ export function StreamingPlayer({ onBack }: StreamingPlayerProps) {
 
     playbackPreparedRef.current = true
 
-    const mp4Url = (anime as any).streamUrlMp4 || anime.streamUrl?.replace('.mpd', '.mp4')
-    if (mp4Url) {
-      console.log('[Player] MP4 directo HTML5')
-      video.src = mp4Url
+    if (!playbackUrl) {
+      setPlayerError(streamPreparing ? 'Preparando stream...' : 'No hay stream preparado.')
+      pushDebug('player:waiting-stream-url')
+      playbackPreparedRef.current = false
+      return 'waiting'
+    }
+
+    if (canPlayMP4(video)) {
+      console.log('[Player] MP4 desde backend')
+      video.src = playbackUrl
       video.controls = false
-      setUsingFallback(true)
-      pushDebug(`player:mp4 url=${mp4Url}`)
+      pushDebug(`player:mp4 url=${playbackUrl}`)
       return 'ready'
     }
 
-    if (!canPlayMP4(video)) {
-      setPlayerError('Tu navegador no soporta MP4.')
-      pushDebug('player:no-mp4-support')
-      return 'error'
-    }
-
-    setPlayerError('No hay stream MP4 disponible.')
-    pushDebug('player:no-mp4')
+    setPlayerError('Tu navegador no soporta MP4.')
+    pushDebug('player:no-mp4-support')
     return 'error'
   }
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
+
+    const preparedMode = preparePlayback(video)
+    if (preparedMode === 'ready') {
+      tryPlay(video, 'mount-autoplay')
+    }
 
     const handleTimeUpdate = () => {
       playerState.value = { ...playerState.value, currentTime: video.currentTime }
@@ -175,7 +258,7 @@ export function StreamingPlayer({ onBack }: StreamingPlayerProps) {
       video.removeEventListener('pause', handlePause)
       video.removeEventListener('error', onVideoError)
     }
-  }, [usingFallback])
+  }, [playbackUrl, streamPreparing])
 
   const togglePlay = () => {
     const video = videoRef.current
@@ -281,8 +364,8 @@ export function StreamingPlayer({ onBack }: StreamingPlayerProps) {
 
   if (!anime) return null
 
-  const playerTitle = usingFallback
-    ? `${anime.title} - Ep ${episodeNum} (MP4)`
+  const playerTitle = playbackUrl
+    ? `${anime.title} - Ep ${episodeNum} (MP4 backend)`
     : `${anime.title} - Ep ${episodeNum}`
 
   return (
@@ -355,9 +438,9 @@ export function StreamingPlayer({ onBack }: StreamingPlayerProps) {
         </div>
       )}
 
-      {usingFallback && !showControls && (
+      {playbackUrl && !showControls && (
         <div class={styles.fallbackHint}>
-          <span>Modo compatibilidad (MP4)</span>
+          <span>Modo compatibilidad (MP4 backend)</span>
         </div>
       )}
     </div>

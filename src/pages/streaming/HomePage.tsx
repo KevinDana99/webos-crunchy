@@ -5,7 +5,18 @@ import { Sidebar } from '../../components/Sidebar';
 import { HeroSection } from '../../components/HeroSection';
 import { AnimeCard } from '../../components/AnimeCard';
 import { SeasonSelector } from '../../components/SeasonSelector';
-import { filteredAnime, searchResults, searchQuery, activeCategory, selectAnime } from '../../state/appState';
+import {
+  filteredAnime,
+  searchResults,
+  searchQuery,
+  activeCategory,
+  selectAnime,
+  currentPage,
+  totalPages,
+  totalItems,
+  nextPage,
+  previousPage,
+} from '../../state/appState';
 import styles from './HomePage.module.css';
 
 export function HomePage() {
@@ -19,6 +30,8 @@ export function HomePage() {
   const showSearchResults = searchQuery.value && searchResults.value.length > 0;
   const animeList = showSearchResults ? searchResults.value : filteredAnime.value;
   const categoryName = activeCategory.value;
+  const canGoBack = currentPage.value > 1;
+  const canGoForward = currentPage.value < totalPages.value;
 
   return (
     <div class={styles.container}>
@@ -38,6 +51,28 @@ export function HomePage() {
             <AnimeCard key={anime.id} anime={anime} onPlay={handlePlay} />
           ))}
         </div>
+
+        {totalItems.value > 0 && (
+          <div class={styles.pagination}>
+            <button
+              class={styles.pageBtn}
+              disabled={!canGoBack}
+              onClick={previousPage}
+            >
+              Previous
+            </button>
+            <span class={styles.pageInfo}>
+              Page {currentPage.value} of {totalPages.value}
+            </span>
+            <button
+              class={styles.pageBtn}
+              disabled={!canGoForward}
+              onClick={nextPage}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </section>
 
       {animeList.length === 0 && (

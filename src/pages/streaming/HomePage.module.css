@@ -28,6 +28,38 @@
   margin: 0.625rem;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.75rem;
+}
+
+.pagination > * + * {
+  margin-left: 1rem;
+}
+
+.pageBtn {
+  min-width: 120px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #3a3a45;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pageBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.pageInfo {
+  color: #b8b8c2;
+  font-size: 0.95rem;
+}
+
 .empty {
   text-align: center;
   color: #666;

@@ -1,9 +1,11 @@
 import { render } from 'preact'
-import { LocationProvider, Router, Route } from 'preact-iso'
+import { useEffect } from 'preact/hooks'
+import { LocationProvider, Router, Route, useLocation } from 'preact-iso'
 import { HomePage } from './pages/streaming/HomePage'
 import { WatchPage } from './pages/streaming/WatchPage'
 import { LoginPage } from './pages/streaming/LoginPage'
 import { DetailPage } from './pages/streaming/DetailPage'
+import { isAuthenticated } from './state/appState'
 import './styles/app.css'
 
 function installLegacyPolyfills() {
@@ -460,15 +462,43 @@ window.addEventListener('wheel', handleWheelScroll, { passive: false })
 window.addEventListener('mousewheel', handleWheelScroll, { passive: false })
 window.addEventListener('DOMMouseScroll', handleWheelScroll, { passive: false })
 
+type RouteComponent = () => any
+
+function ProtectedRoute({ component: Component }: { component: RouteComponent }) {
+  const { route } = useLocation()
+  const authenticated = isAuthenticated.value
+
+  useEffect(() => {
+    if (!authenticated) {
+      route('/login')
+    }
+  }, [authenticated])
+
+  return authenticated ? <Component /> : null
+}
+
+function PublicOnlyRoute({ component: Component }: { component: RouteComponent }) {
+  const { route } = useLocation()
+  const authenticated = isAuthenticated.value
+
+  useEffect(() => {
+    if (authenticated) {
+      route('/')
+    }
+  }, [authenticated])
+
+  return authenticated ? null : <Component />
+}
+
 export function App() {
   return (
     <LocationProvider>
       <Router>
-        <Route path='/' component={HomePage} />
-        <Route path='/watch' component={WatchPage} />
-        <Route path='/login' component={LoginPage} />
-        <Route path='/info' component={DetailPage} />
-        <Route default component={HomePage} />
+        <Route path='/' component={() => <ProtectedRoute component={HomePage} />} />
+        <Route path='/watch' component={() => <ProtectedRoute component={WatchPage} />} />
+        <Route path='/login' component={() => <PublicOnlyRoute component={LoginPage} />} />
+        <Route path='/info' component={() => <ProtectedRoute component={DetailPage} />} />
+        <Route default component={() => <ProtectedRoute component={HomePage} />} />
       </Router>
     </LocationProvider>
   )

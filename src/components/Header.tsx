@@ -38,7 +38,6 @@ export function Header() {
           {queue.value.length > 0 && <span class={styles.badge}>{queue.value.length}</span>}
         </button>
         <button class={styles.loginBtn} onClick={() => route('/login')}>Sign In</button>
-        <button class={styles.signupBtn} onClick={() => route('/login')}>Sign Up</button>
       </div>
     </header>
   );

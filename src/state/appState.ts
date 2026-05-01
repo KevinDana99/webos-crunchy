@@ -1,8 +1,7 @@
 import { signal, computed } from '@preact/signals';
 import { Anime, PlayerState, StreamingPlatform, AuthUser, Category, Season } from '../types';
 import { mockPlatforms } from '../data/content';
-import { getPlatformData } from '../data/platformData';
-import { mockLogin, mockRegister, mockGetCatalog, mockGetContentDetail, mockLoadContent, mockLoadEpisodes } from '../api/mockApi';
+import { backendLogin, backendBootstrapSession, backendRefreshSession, backendGetCatalog, backendGetContentDetail, backendLoadContent, backendLoadEpisodes, clearCatalogCache, clearStreamCache } from '../api/backendApi';
 
 // === ESTADO GLOBAL ===
 export const streamingPlatforms = signal(mockPlatforms);
@@ -14,18 +13,27 @@ export const animeList = signal<Anime[]>([]);
 
 export const currentAnime = signal<Anime | null>(null);
 export const currentEpisode = signal(1);
+export const currentPlaybackUrl = signal('');
 export const authUser = signal<AuthUser | null>(null);
 export const authSession = signal<any>(null);
 export const catalogLoading = signal(false);
 export const authLoading = signal(false);
+export const bootstrapLoading = signal(false);
 export const isAuthenticated = computed(() => !!authUser.value && authUser.value.expiresAt > Date.now());
 
 export const queue = signal<string[]>([]);
 export const searchQuery = signal('');
 export const activeCategory = signal<string>('all');
 export const activeSeason = signal<string>('');
+export const currentPage = signal(1);
+export const pageSize = signal(20);
+export const totalItems = signal(0);
 export const showSidebar = signal(false);
 export const showQueue = signal(false);
+
+let refreshTimer: number | null = null;
+let refreshInFlight = false;
+let refreshQueue: Array<(success: boolean) => void> = [];
 
 export const playerState = signal<PlayerState>({
   playing: false,
@@ -39,16 +47,11 @@ export const playerState = signal<PlayerState>({
 });
 
 // === COMPUTED ===
-export const searchResults = computed(() => {
-  if (!searchQuery.value) return [];
-  var q = searchQuery.value.toLowerCase();
-  return animeList.value.filter(function(a) {
-    return a.title.toLowerCase().indexOf(q) !== -1 ||
-      (a.titleJapanese && a.titleJapanese.toLowerCase().indexOf(q) !== -1) ||
-      a.synopsis.toLowerCase().indexOf(q) !== -1 ||
-      a.genres.some(function(g) { return g.toLowerCase().indexOf(q) !== -1; });
-  });
+export const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(totalItems.value / pageSize.value));
 });
+
+export const searchResults = computed(() => animeList.value);
 
 export const filteredAnime = computed(() => {
   var categoryId = activeCategory.value;
@@ -80,6 +83,7 @@ export function playAnime(anime: Anime, episode?: number): void {
   var ep = episode || 1;
   currentAnime.value = anime;
   currentEpisode.value = ep;
+  currentPlaybackUrl.value = '';
   playerState.value = {
     ...playerState.value,
     playing: false,
@@ -95,21 +99,148 @@ export function selectAnime(anime: Anime): void {
 
 export function setActiveCategory(categoryId: string): void {
   activeCategory.value = categoryId;
+  currentPage.value = 1;
 }
 
 export function setActiveSeason(seasonId: string): void {
   activeSeason.value = seasonId;
+  currentPage.value = 1;
 }
 
 export function setSearchQuery(query: string): void {
   searchQuery.value = query;
+  currentPage.value = 1;
+
+  if (isAuthenticated.value && currentPlatform.value) {
+    loadCurrentPage(1);
+  }
 }
 
 function applySession(platform: StreamingPlatform, session: any) {
   authSession.value = session;
   authUser.value = session.user;
   currentPlatform.value = platform;
+  scheduleSessionRefresh(platform, session);
   return session.user;
+}
+
+function clearRefreshTimer(): void {
+  if (refreshTimer !== null) {
+    window.clearTimeout(refreshTimer);
+    refreshTimer = null;
+  }
+}
+
+function scheduleSessionRefresh(platform: StreamingPlatform, session: any): void {
+  clearRefreshTimer();
+
+  if (!session || !session.refreshToken || platform.id !== 'crunchyroll' || !session.user) {
+    return;
+  }
+
+  const msUntilRefresh = session.user.expiresAt - Date.now() - 60 * 1000;
+  const delay = Math.max(5 * 1000, msUntilRefresh);
+
+  refreshTimer = window.setTimeout(function onRefreshTimer() {
+    refreshAuthSession(function noop() {}, platform);
+  }, delay);
+}
+
+function flushRefreshQueue(success: boolean): void {
+  const queued = refreshQueue.slice();
+  refreshQueue = [];
+
+  for (let i = 0; i < queued.length; i += 1) {
+    queued[i](success);
+  }
+}
+
+export function refreshAuthSession(callback?: (success: boolean) => void, forcedPlatform?: StreamingPlatform | null): void {
+  const platform = forcedPlatform || currentPlatform.value;
+  const session = authSession.value;
+
+  if (!platform || !session || !session.refreshToken || platform.id !== 'crunchyroll') {
+    if (callback) callback(false);
+    return;
+  }
+
+  if (refreshInFlight) {
+    if (callback) refreshQueue.push(callback);
+    return;
+  }
+
+  refreshInFlight = true;
+  if (callback) refreshQueue.push(callback);
+
+  backendRefreshSession(platform, session.refreshToken, function(response) {
+    refreshInFlight = false;
+
+    if ('error' in response) {
+      clearRefreshTimer();
+      flushRefreshQueue(false);
+      return;
+    }
+
+    const currentSession = authSession.value;
+    const refreshedSession = {
+      ...response.data,
+      refreshToken: response.data.refreshToken || (currentSession ? currentSession.refreshToken : ''),
+      user: {
+        ...response.data.user,
+        email: response.data.user.email || (currentSession && currentSession.user ? currentSession.user.email : ''),
+        username: response.data.user.username || (currentSession && currentSession.user ? currentSession.user.username : platform.name),
+        avatar: response.data.user.avatar || (currentSession && currentSession.user ? currentSession.user.avatar : undefined),
+      },
+    };
+
+    applySession(platform, refreshedSession);
+    clearCatalogCache();
+    clearStreamCache();
+    flushRefreshQueue(true);
+  });
+}
+
+export function ensureFreshSession(callback: (success: boolean) => void): void {
+  const platform = currentPlatform.value;
+  const session = authSession.value;
+
+  if (!platform || !session || platform.id !== 'crunchyroll' || !session.refreshToken) {
+    callback(true);
+    return;
+  }
+
+  const expiresAt = session.user && session.user.expiresAt ? session.user.expiresAt : 0;
+  if (expiresAt - Date.now() > 60 * 1000) {
+    callback(true);
+    return;
+  }
+
+  refreshAuthSession(callback, platform);
+}
+
+function withSessionRetry(
+  action: (done: (response: any) => void) => void,
+  callback?: (response: any) => void
+): void {
+  ensureFreshSession(function(_ready) {
+    action(function(response) {
+      if (response && response.error && response.error.status === 401) {
+        refreshAuthSession(function(success) {
+          if (!success) {
+            if (callback) callback(response);
+            return;
+          }
+
+          action(function(retriedResponse) {
+            if (callback) callback(retriedResponse);
+          });
+        });
+        return;
+      }
+
+      if (callback) callback(response);
+    });
+  });
 }
 
 // === AUTH (CALLBACK-BASED) ===
@@ -122,7 +253,7 @@ export function authenticate(platform: StreamingPlatform, email: string, _passwo
     return;
   }
 
-  mockLogin(platform, { email: email, password: _password }, function(response) {
+  backendLogin(platform, { email: email, password: _password }, function(response) {
     if ('error' in response) {
       authLoading.value = false;
       callback(null);
@@ -140,27 +271,20 @@ export function authenticate(platform: StreamingPlatform, email: string, _passwo
   });
 }
 
-export function register(platform: StreamingPlatform, payload: { email: string; password: string; username: string }, callback: (user: AuthUser | null) => void): void {
-  authLoading.value = true;
+export function bootstrapAuthentication(platform: StreamingPlatform, callback: (user: AuthUser | null) => void): void {
+  bootstrapLoading.value = true;
 
-  if (!payload.email || !payload.username) {
-    authLoading.value = false;
-    callback(null);
-    return;
-  }
+  backendBootstrapSession(platform, function(response) {
+    bootstrapLoading.value = false;
 
-  mockRegister(platform, payload, function(response) {
     if ('error' in response) {
-      authLoading.value = false;
       callback(null);
       return;
     }
 
-    var session = response.data;
+    const session = response.data;
     applySession(platform, session);
-    authLoading.value = false;
 
-    // Cargar catálogo y notificar cuando termine
     loadPlatformCatalog(platform, function() {
       callback(session.user);
     });
@@ -171,7 +295,15 @@ export function register(platform: StreamingPlatform, payload: { email: string; 
 export function loadPlatformCatalog(platform: StreamingPlatform, callback?: () => void): void {
   catalogLoading.value = true;
 
-  mockGetCatalog(platform, function(response) {
+  withSessionRetry(function(done) {
+    backendGetCatalog(
+      platform,
+      authSession.value ? authSession.value.accessToken : undefined,
+      currentPage.value,
+      pageSize.value,
+      done
+    );
+  }, function(response) {
     if ('error' in response) {
       catalogLoading.value = false;
       if (callback) callback();
@@ -179,9 +311,11 @@ export function loadPlatformCatalog(platform: StreamingPlatform, callback?: () =
     }
 
     var catalog = response.data;
-    categories.value = catalog.categories;
-    seasons.value = catalog.seasons;
-    animeList.value = catalog.anime;
+    categories.value = catalog.platform.categories;
+    seasons.value = catalog.platform.seasons;
+    animeList.value = catalog.platform.anime;
+    currentPage.value = catalog.page;
+    totalItems.value = catalog.total;
     currentPlatform.value = platform;
 
     catalogLoading.value = false;
@@ -191,21 +325,38 @@ export function loadPlatformCatalog(platform: StreamingPlatform, callback?: () =
 }
 
 export function loadContent(platform: StreamingPlatform, _query?: any, callback?: (data: any) => void): void {
-  mockLoadContent(platform, _query, function(response) {
+  withSessionRetry(function(done) {
+    backendLoadContent(
+      platform,
+      authSession.value ? authSession.value.accessToken : undefined,
+      {
+        search: _query && _query.search ? _query.search : searchQuery.value,
+        page: currentPage.value,
+        limit: pageSize.value,
+      },
+      done
+    );
+  }, function(response) {
     if ('error' in response) {
       if (callback) callback(null);
       return;
     }
 
-    animeList.value = response.data;
+    animeList.value = response.data.platform.anime;
+    categories.value = response.data.platform.categories;
+    seasons.value = response.data.platform.seasons;
+    currentPage.value = response.data.page;
+    totalItems.value = response.data.total;
     if (callback) {
-      callback({ data: response.data });
+      callback({ data: response.data.platform.anime });
     }
   });
 }
 
 export function loadContentDetail(platform: StreamingPlatform, contentId: string, callback: (data: any) => void): void {
-  mockGetContentDetail(platform, contentId, function(response) {
+  withSessionRetry(function(done) {
+    backendGetContentDetail(platform, authSession.value ? authSession.value.accessToken : undefined, contentId, done);
+  }, function(response) {
     if ('error' in response) {
       callback(null);
       return;
@@ -221,7 +372,9 @@ export function loadContentDetail(platform: StreamingPlatform, contentId: string
 }
 
 export function loadEpisodes(platform: StreamingPlatform, contentId: string, callback: (data: any) => void): void {
-  mockLoadEpisodes(platform, contentId, function(response) {
+  withSessionRetry(function(done) {
+    backendLoadEpisodes(platform, authSession.value ? authSession.value.accessToken : undefined, contentId, done);
+  }, function(response) {
     if ('error' in response) {
       callback({ data: [] });
       return;
@@ -233,24 +386,60 @@ export function loadEpisodes(platform: StreamingPlatform, contentId: string, cal
 
 // === UTILS ===
 export function logout(): void {
+  clearRefreshTimer();
   authUser.value = null;
   authSession.value = null;
+  bootstrapLoading.value = false;
   currentPlatform.value = mockPlatforms[0];
-  var defaultData = getPlatformData('crunchyroll');
-  animeList.value = defaultData.anime;
-  categories.value = defaultData.categories;
-  seasons.value = defaultData.seasons;
+  currentPlaybackUrl.value = '';
+  currentPage.value = 1;
+  totalItems.value = 0;
+  animeList.value = [];
+  categories.value = [];
+  seasons.value = [];
   activeCategory.value = 'all';
+  activeSeason.value = '';
+  clearCatalogCache();
+  clearStreamCache();
 }
 
 export function selectPlatform(platform: StreamingPlatform): void {
   currentPlatform.value = platform;
-  var data = getPlatformData(platform.id);
-  animeList.value = data.anime;
-  categories.value = data.categories;
-  seasons.value = data.seasons;
   activeCategory.value = 'all';
   activeSeason.value = '';
+
+  if (isAuthenticated.value) {
+    loadCurrentPage(1);
+  }
+}
+
+export function loadCurrentPage(page?: number): void {
+  const platform = currentPlatform.value;
+  if (!platform) return;
+
+  currentPage.value = page || currentPage.value;
+
+  if (searchQuery.value) {
+    loadContent(platform, { search: searchQuery.value });
+    return;
+  }
+
+  loadPlatformCatalog(platform);
+}
+
+export function goToPage(page: number): void {
+  const safePage = Math.max(1, Math.min(page, totalPages.value));
+  loadCurrentPage(safePage);
+}
+
+export function nextPage(): void {
+  if (currentPage.value >= totalPages.value) return;
+  goToPage(currentPage.value + 1);
+}
+
+export function previousPage(): void {
+  if (currentPage.value <= 1) return;
+  goToPage(currentPage.value - 1);
 }
 
 // Inicializar con datos de Crunchyroll al cargar la app

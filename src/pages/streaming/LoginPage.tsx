@@ -1,19 +1,27 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'preact-iso';
-import { streamingPlatforms, currentPlatform, authenticate, register, selectPlatform } from '../../state/appState';
+import { streamingPlatforms, currentPlatform, authenticate, bootstrapAuthentication, bootstrapLoading, selectPlatform } from '../../state/appState';
 import { StreamingPlatform } from '../../types';
 import styles from './LoginPage.module.css';
 
 export function LoginPage() {
   const { route } = useLocation();
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [selectedPlatform, setSelectedPlatform] = useState<StreamingPlatform>(currentPlatform.value!);
+
+  useEffect(() => {
+    if (selectedPlatform.id !== 'crunchyroll') return;
+
+    bootstrapAuthentication(selectedPlatform, (user) => {
+      if (user) {
+        route('/');
+      }
+    });
+  }, []);
 
   const handlePlatformSelect = (platform: StreamingPlatform) => {
     setSelectedPlatform(platform);
@@ -47,31 +55,41 @@ export function LoginPage() {
     }
 
     setLoading(true);
-    
-    if (isLogin) {
-      authenticate(selectedPlatform, email, password, (user) => {
-        setLoading(false);
-        if (user) {
-          route('/');
-        } else {
-          setError('Invalid credentials');
-        }
-      });
-    } else {
-      register(selectedPlatform, {
-        email,
-        password,
-        username: username || email.split('@')[0]
-      }, (user) => {
-        setLoading(false);
-        if (user) {
-          route('/');
-        } else {
-          setError('Invalid credentials');
-        }
-      });
-    }
+
+    authenticate(selectedPlatform, email, password, (user) => {
+      setLoading(false);
+      if (user) {
+        route('/');
+      } else {
+        setError('Invalid credentials');
+      }
+    });
   };
+
+  const signupPlatformName =
+    selectedPlatform.id === 'crunchyroll' ? 'Crunchyroll' : selectedPlatform.name
+
+  const signupUrl =
+    selectedPlatform.id === 'crunchyroll'
+      ? 'https://www.crunchyroll.com/welcome'
+      : '#'
+
+  const signupTarget =
+    signupUrl === '#' ? undefined : '_blank'
+
+  const signupRel =
+    signupUrl === '#' ? undefined : 'noreferrer'
+
+  const signupLabel =
+    signupUrl === '#'
+      ? `Create your ${signupPlatformName} account on the official platform.`
+      : `Create your ${signupPlatformName} account on the official site.`
+
+  const signupHint =
+    signupUrl === '#'
+      ? `Registration is handled directly by ${signupPlatformName}.`
+      : `New accounts are created directly on ${signupPlatformName}, not in this app.`
+  ;
 
   return (
     <div class={styles.container}>
@@ -111,32 +129,12 @@ export function LoginPage() {
         <h1 class={styles.logo} style={{ color: selectedPlatform.accentColor }}>
           {selectedPlatform.name}
         </h1>
-        
-        <div class={styles.tabs}>
-          <button 
-            class={`${styles.tab} ${isLogin ? styles.active : ''}`}
-            onClick={() => setIsLogin(true)}
-          >
-            Sign In
-          </button>
-          <button 
-            class={`${styles.tab} ${!isLogin ? styles.active : ''}`}
-            onClick={() => setIsLogin(false)}
-          >
-            Sign Up
-          </button>
-        </div>
+
+        <p class={styles.subtitle}>
+          Sign in with your existing {selectedPlatform.name} account.
+        </p>
 
         <form class={styles.form} onSubmit={handleSubmit}>
-          {!isLogin && (
-            <input
-              type="text"
-              placeholder="Username"
-              class={styles.input}
-              value={username}
-              onInput={(e) => setUsername(e.currentTarget.value)}
-            />
-          )}
           <input
             type="email"
             placeholder="Email"
@@ -158,11 +156,23 @@ export function LoginPage() {
             type="submit" 
             class={styles.submitBtn}
             style={{ background: selectedPlatform.accentColor }}
-            disabled={loading}
+            disabled={loading || bootstrapLoading.value}
           >
-            {loading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+            {bootstrapLoading.value ? 'Restoring session...' : loading ? 'Loading...' : 'Sign In'}
           </button>
         </form>
+
+        <div class={styles.signupNotice}>
+          <p class={styles.signupHint}>{signupHint}</p>
+          <a
+            class={styles.signupLink}
+            href={signupUrl}
+            target={signupTarget}
+            rel={signupRel}
+          >
+            {signupLabel}
+          </a>
+        </div>
 
         <div class={styles.divider}>
           <span>or</span>
@@ -203,13 +213,6 @@ export function LoginPage() {
           <a href="#">Privacy Policy</a>.
         </p>
       </div>
-
-        <button class={styles.skipBtn} onClick={() => {
-          selectPlatform(selectedPlatform);
-          route('/');
-        }}>
-          Skip for now →
-        </button>
     </div>
   );
 }
